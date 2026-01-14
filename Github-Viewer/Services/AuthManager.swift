@@ -26,6 +26,7 @@ protocol AuthManagerProtocol {
     func getBiometryType() -> LABiometryType
     func validateCurrentToken(completion: @escaping (Result<GitHubUserProfile, AuthError>) -> Void)
     func checkForSavedToken() -> Bool
+    func requestBiometryPermission(completion: @escaping (Result<Bool, AuthError>) -> Void)
 }
 
 enum AuthError: Error, LocalizedError {
@@ -282,6 +283,52 @@ class AuthManager: AuthManagerProtocol {
         
         keychain.set("true", for: Constants.KeychainKeys.tokenSaved)
         return true
+    }
+    
+    func requestBiometryPermission(completion: @escaping (Result<Bool, AuthError>) -> Void) {
+        let context = LAContext()
+        var error: NSError?
+        
+        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
+            if let error = error {
+                switch error.code {
+                case LAError.biometryNotAvailable.rawValue:
+                    completion(.failure(.biometryNotAvailable))
+                case LAError.biometryNotEnrolled.rawValue:
+                    completion(.failure(.biometryNotEnrolled))
+                default:
+                    completion(.failure(.biometryFailed))
+                }
+            } else {
+                completion(.failure(.biometryNotAvailable))
+            }
+            return
+        }
+        
+        // Request for permission
+        let reason = "允许使用生物识别功能以便下次快速登录"
+        context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, error in
+            DispatchQueue.main.async {
+                if success {
+                    completion(.success(true))
+                } else {
+                    if let error = error as? LAError {
+                        switch error.code {
+                        case .userCancel, .userFallback, .systemCancel:
+                            completion(.failure(.userCancel))
+                        case .biometryNotAvailable:
+                            completion(.failure(.biometryNotAvailable))
+                        case .biometryNotEnrolled:
+                            completion(.failure(.biometryNotEnrolled))
+                        default:
+                            completion(.failure(.biometryFailed))
+                        }
+                    } else {
+                        completion(.failure(.biometryFailed))
+                    }
+                }
+            }
+        }
     }
 }
 

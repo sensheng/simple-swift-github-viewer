@@ -141,7 +141,28 @@ class MeViewModel: ObservableObject {
     func saveTokenAndLogin(shouldSave: Bool) {
         guard let userProfile = pendingUserProfile else { return }
         
-        // Save token if needed, but keep qiete
+        if shouldSave {
+            // User chose to save, check biometry permission first
+            authManager.requestBiometryPermission { [weak self] result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let granted):
+                        // Only save token if biometry permission is granted
+                        self?.completeSaveAndLogin(shouldSave: true, userProfile: userProfile)
+                    case .failure(let error):
+                        // If biometry permission failed, do not save token
+                        self?.handleBiometryPermissionError(error, userProfile: userProfile)
+                    }
+                }
+            }
+        } else {
+            // User chose not to save
+            completeSaveAndLogin(shouldSave: false, userProfile: userProfile)
+        }
+    }
+    
+    private func completeSaveAndLogin(shouldSave: Bool, userProfile: GitHubUserProfile) {
+        // Save token if needed, but keep quiet
         authManager.saveCredentialsQuietly(userProfile: userProfile, token: pendingToken, shouldSave: shouldSave)
         
         // Update login status
@@ -153,8 +174,32 @@ class MeViewModel: ObservableObject {
         pendingToken = ""
         showTokenSaveAlert = false
         
-        // Nofify the suceed of login
+        // Notify the success of login
         NotificationCenter.default.post(name: .userDidLogin, object: nil)
+    }
+    
+    private func handleBiometryPermissionError(_ error: AuthError, userProfile: GitHubUserProfile) {
+        var message = ""
+        
+        switch error {
+        case .biometryNotAvailable:
+            message = "设备不支持生物识别，但Token仍会保存"
+        case .biometryNotEnrolled:
+            message = "未设置生物识别，请在系统设置中设置后即可使用快速登录"
+        case .userCancel:
+            message = "您取消了生物识别授权，Token仍会保存，但无法使用快速登录"
+        default:
+            message = "生物识别设置失败，Token仍会保存"
+        }
+        
+        // Do not save token when biometry permission is denied
+        // Complete login without saving credentials
+        completeSaveAndLogin(shouldSave: false, userProfile: userProfile)
+        
+        // Show error message to user
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.errorMessage = message
+        }
     }
     
     func loginWithBiometry() {

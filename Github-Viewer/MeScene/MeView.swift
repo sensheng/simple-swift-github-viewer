@@ -155,7 +155,7 @@ struct LoginView: View {
                     
                     VStack(alignment: .leading, spacing: 8) {
                         InfoRow(icon: "shield.fill", text: "Token 将安全存储在设备钥匙串中")
-                        InfoRow(icon: "faceid", text: "登录后可使用生物识别快速登录")
+                        InfoRow(icon: "faceid", text: "只有获得生物识别权限才会保存Token")
                         InfoRow(icon: "checkmark.seal", text: "推荐权限：read:user, user:email, repo")
                         InfoRow(icon: "exclamationmark.triangle", text: "请勿与他人分享您的 Token")
                     }
