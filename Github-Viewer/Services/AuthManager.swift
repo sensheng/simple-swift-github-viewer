@@ -15,14 +15,17 @@ protocol AuthManagerProtocol {
     var isLoggedIn: Bool { get }
     var accessToken: String? { get }
     var username: String? { get }
+    var hasTokenSaved: Bool { get }
     
     func loginWithToken(_ token: String, completion: @escaping (Result<GitHubUserProfile, AuthError>) -> Void)
     func loginWithBiometry(completion: @escaping (Result<GitHubUserProfile, AuthError>) -> Void)
     func logout()
-    func saveCredentials(userProfile: GitHubUserProfile, token: String)
+    func saveCredentials(userProfile: GitHubUserProfile, token: String, shouldSave: Bool)
+    func saveCredentialsQuietly(userProfile: GitHubUserProfile, token: String, shouldSave: Bool)
     func isBiometryAvailable() -> Bool
     func getBiometryType() -> LABiometryType
     func validateCurrentToken(completion: @escaping (Result<GitHubUserProfile, AuthError>) -> Void)
+    func checkForSavedToken() -> Bool
 }
 
 enum AuthError: Error, LocalizedError {
@@ -87,13 +90,17 @@ class AuthManager: AuthManagerProtocol {
         return keychain.getString(for: Constants.KeychainKeys.username)
     }
     
+    var hasTokenSaved: Bool {
+        return keychain.getString(for: Constants.KeychainKeys.tokenSaved) == "true"
+    }
+    
     // MARK: - Authentication Methods
     
     func loginWithToken(_ token: String, completion: @escaping (Result<GitHubUserProfile, AuthError>) -> Void) {
         // Validate token by fetching user profile
         apiService.validateToken(token)
             .sink(
-                receiveCompletion: { [weak self] completionResult in
+                receiveCompletion: { completionResult in
                     switch completionResult {
                     case .failure(let error):
                         DispatchQueue.main.async {
@@ -116,10 +123,9 @@ class AuthManager: AuthManagerProtocol {
                         break
                     }
                 },
-                receiveValue: { [weak self] userProfile in
+                receiveValue: { userProfile in
                     DispatchQueue.main.async {
-                        // Save credentials
-                        self?.saveCredentials(userProfile: userProfile, token: token)
+                        // 登录成功，但不立即保存Token，等待用户选择
                         completion(.success(userProfile))
                     }
                 }
@@ -133,7 +139,7 @@ class AuthManager: AuthManagerProtocol {
             return
         }
         
-        guard let savedToken = accessToken else {
+        guard hasTokenSaved else {
             completion(.failure(.invalidToken))
             return
         }
@@ -144,7 +150,7 @@ class AuthManager: AuthManagerProtocol {
         context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { [weak self] success, error in
             DispatchQueue.main.async {
                 if success {
-                    // Validate current token
+                    // 生物识别成功，验证保存的Token
                     self?.validateCurrentToken(completion: completion)
                 } else {
                     if let error = error as? LAError {
@@ -210,6 +216,7 @@ class AuthManager: AuthManagerProtocol {
         keychain.delete(for: Constants.KeychainKeys.accessToken)
         keychain.delete(for: Constants.KeychainKeys.username)
         keychain.delete(for: Constants.KeychainKeys.userID)
+        keychain.delete(for: Constants.KeychainKeys.tokenSaved)
         
         // Clear user-specific cache
         CacheManager.shared.clearCache()
@@ -221,13 +228,27 @@ class AuthManager: AuthManagerProtocol {
         NotificationCenter.default.post(name: .userDidLogout, object: nil)
     }
     
-    func saveCredentials(userProfile: GitHubUserProfile, token: String) {
-        keychain.set(token, for: Constants.KeychainKeys.accessToken)
-        keychain.set(userProfile.login, for: Constants.KeychainKeys.username)
-        keychain.set(String(userProfile.id), for: Constants.KeychainKeys.userID)
+    func saveCredentials(userProfile: GitHubUserProfile, token: String, shouldSave: Bool) {
+        saveCredentialsQuietly(userProfile: userProfile, token: token, shouldSave: shouldSave)
         
         // Post login notification
         NotificationCenter.default.post(name: .userDidLogin, object: nil)
+    }
+    
+    func saveCredentialsQuietly(userProfile: GitHubUserProfile, token: String, shouldSave: Bool) {
+        if shouldSave {
+            // Save login token to keychain
+            keychain.set(token, for: Constants.KeychainKeys.accessToken)
+            keychain.set(userProfile.login, for: Constants.KeychainKeys.username)
+            keychain.set(String(userProfile.id), for: Constants.KeychainKeys.userID)
+            keychain.set("true", for: Constants.KeychainKeys.tokenSaved)
+        } else {
+            // Ensure token is cleaned from keychain
+            keychain.delete(for: Constants.KeychainKeys.accessToken)
+            keychain.delete(for: Constants.KeychainKeys.username)
+            keychain.delete(for: Constants.KeychainKeys.userID)
+            keychain.delete(for: Constants.KeychainKeys.tokenSaved)
+        }
     }
     
     // MARK: - Biometry Support
@@ -236,7 +257,7 @@ class AuthManager: AuthManagerProtocol {
         let context = LAContext()
         var error: NSError?
         
-        return context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) && isLoggedIn
+        return context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
     }
     
     func getBiometryType() -> LABiometryType {
@@ -248,6 +269,19 @@ class AuthManager: AuthManagerProtocol {
         }
         
         return context.biometryType
+    }
+    
+    func checkForSavedToken() -> Bool {
+        guard let token = accessToken, !token.isEmpty else {
+            return false
+        }
+        
+        if keychain.getString(for: Constants.KeychainKeys.tokenSaved) != nil {
+            return hasTokenSaved
+        }
+        
+        keychain.set("true", for: Constants.KeychainKeys.tokenSaved)
+        return true
     }
 }
 
@@ -272,7 +306,7 @@ private class KeychainManager {
         let status = SecItemAdd(query as CFDictionary, nil)
         
         if status != errSecSuccess {
-            print("Keychain save error: \(status)")
+            print("⚠️ Keychain save error: \(status)")
         }
     }
     

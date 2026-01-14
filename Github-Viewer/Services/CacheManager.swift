@@ -94,7 +94,7 @@ class CacheManager: CacheManagerProtocol {
                 try fileManager.removeItem(at: file)
             }
         } catch {
-            print("Failed to clear cache: \(error)")
+            print("⚠️ Failed to clear cache: \(error)")
         }
         
         // Clear UserDefaults cache keys
@@ -122,7 +122,7 @@ class CacheManager: CacheManagerProtocol {
                 }
             }
         } catch {
-            print("Failed to clear expired cache: \(error)")
+            print("⚠️ Failed to clear expired cache: \(error)")
         }
     }
     
@@ -139,7 +139,7 @@ class CacheManager: CacheManagerProtocol {
             // Store expiration time in UserDefaults for quick access
             userDefaults.set(cacheData.timestamp, forKey: Constants.CacheKeys.cacheExpiration + fileName)
         } catch {
-            print("Failed to save cache data for key \(key): \(error)")
+            print("⚠️ Failed to save cache data for key \(key): \(error)")
         }
     }
     
@@ -155,7 +155,7 @@ class CacheManager: CacheManagerProtocol {
             let data = try Data(contentsOf: fileURL)
             return try JSONDecoder().decode(CacheData<T>.self, from: data)
         } catch {
-            print("Failed to load cache data for key \(key): \(error)")
+            print("⚠️ Failed to load cache data for key \(key): \(error)")
             // Remove corrupted cache file
             try? fileManager.removeItem(at: fileURL)
             return nil
@@ -203,7 +203,7 @@ extension CacheManager {
                 fileCount += 1
             }
         } catch {
-            print("Failed to get cache statistics: \(error)")
+            print("⚠️ Failed to get cache statistics: \(error)")
         }
         
         return CacheStatistics(totalSize: totalSize, fileCount: fileCount)

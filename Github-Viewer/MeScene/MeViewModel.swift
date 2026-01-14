@@ -17,6 +17,7 @@ enum LoginState: Equatable {
     case notLoggedIn
     case loggingIn
     case loggedIn(GitHubUserProfile)
+    case waitingForSaveChoice(GitHubUserProfile)
     case error(String)
     
     var isLoggedIn: Bool {
@@ -38,6 +39,9 @@ class MeViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var showBiometryLogin: Bool = false
     @Published var errorMessage: String?
+    @Published var showTokenSaveAlert: Bool = false
+    @Published var pendingUserProfile: GitHubUserProfile?
+    @Published var pendingToken: String = ""
     
     // MARK: - Private Properties
     
@@ -76,15 +80,27 @@ class MeViewModel: ObservableObject {
         $loginState
             .map { [weak self] state in
                 guard let self = self else { return false }
-                return !state.isLoggedIn && self.authManager.isBiometryAvailable()
+                switch state {
+                case .notLoggedIn:
+                    return self.authManager.checkForSavedToken() && self.authManager.isBiometryAvailable()
+                default:
+                    return false
+                }
             }
             .assign(to: \.showBiometryLogin, on: self)
+            .store(in: &cancellables)
+        
+        $showTokenSaveAlert
+            .sink { isShowing in
+                // Do nothing
+            }
             .store(in: &cancellables)
     }
     
     private func checkInitialLoginState() {
-        if authManager.isLoggedIn {
-            validateAndLoadProfile()
+        if authManager.checkForSavedToken() {
+            // Auto login if needed
+            loginWithBiometry()
         } else {
             loginState = .notLoggedIn
         }
@@ -110,14 +126,35 @@ class MeViewModel: ObservableObject {
                 
                 switch result {
                 case .success(let userProfile):
-                    self?.loginState = .loggedIn(userProfile)
-                    self?.accessToken = "" // Clear token from UI for security
+                    self?.pendingUserProfile = userProfile
+                    self?.pendingToken = trimmedToken
+                    self?.loginState = .waitingForSaveChoice(userProfile)
+                    self?.showTokenSaveAlert = true
                 case .failure(let error):
                     self?.loginState = .error(error.localizedDescription)
                     self?.errorMessage = error.localizedDescription
                 }
             }
         }
+    }
+    
+    func saveTokenAndLogin(shouldSave: Bool) {
+        guard let userProfile = pendingUserProfile else { return }
+        
+        // Save token if needed, but keep qiete
+        authManager.saveCredentialsQuietly(userProfile: userProfile, token: pendingToken, shouldSave: shouldSave)
+        
+        // Update login status
+        loginState = .loggedIn(userProfile)
+        accessToken = "" // Clear token from UI for security
+        
+        // Clean up
+        pendingUserProfile = nil
+        pendingToken = ""
+        showTokenSaveAlert = false
+        
+        // Nofify the suceed of login
+        NotificationCenter.default.post(name: .userDidLogin, object: nil)
     }
     
     func loginWithBiometry() {
@@ -159,19 +196,33 @@ class MeViewModel: ObservableObject {
         }
     }
     
+    func cancelTokenSave() {
+        showTokenSaveAlert = false
+        pendingUserProfile = nil
+        pendingToken = ""
+        loginState = .notLoggedIn
+        accessToken = ""
+    }
+    
     // MARK: - Private Methods
     
     private func handleLoginSuccess() {
         // Clear login form
         accessToken = ""
         
-        // Profile is already loaded in loginWithToken, no need to reload
+        // Wait until user has decision of saving token
+        if case .waitingForSaveChoice = loginState {
+            return
+        }        
     }
     
     private func handleLogout() {
         loginState = .notLoggedIn
         accessToken = ""
         errorMessage = nil
+        showTokenSaveAlert = false
+        pendingUserProfile = nil
+        pendingToken = ""
     }
     
     private func validateAndLoadProfile() {
@@ -204,6 +255,17 @@ class MeViewModel: ObservableObject {
             return "使用 Touch ID 登录"
         default:
             return "使用生物识别登录"
+        }
+    }
+    
+    var biometryName: String {
+        switch authManager.getBiometryType() {
+        case .faceID:
+            return "Face ID"
+        case .touchID:
+            return "Touch ID"
+        default:
+            return "生物识别"
         }
     }
     

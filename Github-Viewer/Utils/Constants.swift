@@ -43,6 +43,7 @@ struct Constants {
         static let accessToken = "github_access_token"
         static let username = "github_username"
         static let userID = "github_user_id"
+        static let tokenSaved = "github_token_saved"
     }
     
     // MARK: - UI Configuration

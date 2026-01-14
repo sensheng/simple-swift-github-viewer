@@ -13,7 +13,7 @@ import LocalAuthentication
 struct MeView: View {
     
     @StateObject private var viewModel = MeViewModel()
-    @State private var showingAlert = false
+    @State private var showingErrorAlert = false
     
     var body: some View {
         NavigationView {
@@ -30,6 +30,8 @@ struct MeView: View {
                     LoadingView(message: "登录中...")
                 case .loggedIn(let userProfile):
                     ProfileView(userProfile: userProfile, viewModel: viewModel)
+                case .waitingForSaveChoice(let userProfile):
+                    ProfileView(userProfile: userProfile, viewModel: viewModel)
                 case .error(let errorMessage):
                     ErrorView(message: errorMessage, viewModel: viewModel)
                 }
@@ -37,17 +39,17 @@ struct MeView: View {
             .navigationTitle("我的")
             .navigationBarTitleDisplayMode(.large)
         }
-        .alert(isPresented: $showingAlert) {
+        .alert(isPresented: $viewModel.showTokenSaveAlert) {
             Alert(
-                title: Text("错误"),
-                message: Text(viewModel.errorMessage ?? ""),
-                dismissButton: .default(Text("确定")) {
-                    viewModel.clearError()
+                title: Text("保存登录信息"),
+                message: Text("是否保存您的登录信息？保存后可使用\(viewModel.biometryName)快速登录。"),
+                primaryButton: .default(Text("保存")) {
+                    viewModel.saveTokenAndLogin(shouldSave: true)
+                },
+                secondaryButton: .cancel(Text("不保存")) {
+                    viewModel.saveTokenAndLogin(shouldSave: false)
                 }
             )
-        }
-        .onReceive(viewModel.$errorMessage) { errorMessage in
-            showingAlert = errorMessage != nil
         }
     }
 }
@@ -261,7 +263,6 @@ struct ProfileHeaderView: View {
     
     var body: some View {
         VStack(spacing: 16) {
-            // Avatar - iOS 14 compatible
             RemoteImageView(url: userProfile.avatarURL)
                 .frame(width: 100, height: 100)
                 .clipShape(Circle())

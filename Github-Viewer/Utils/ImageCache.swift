@@ -90,7 +90,7 @@ class ImageCache {
                 try fileManager.removeItem(at: file)
             }
         } catch {
-            print("Failed to clear image cache: \(error)")
+            print("⚠️ Failed to clear image cache: \(error)")
         }
     }
     
@@ -130,7 +130,7 @@ class ImageCache {
         do {
             try data.write(to: fileURL)
         } catch {
-            print("Failed to save image to disk: \(error)")
+            print("⚠️ Failed to save image to disk: \(error)")
         }
     }
     
@@ -155,7 +155,7 @@ class ImageCache {
                     }
                 }
             } catch {
-                print("Failed to clean expired image cache: \(error)")
+                print("⚠️ Failed to clean expired image cache: \(error)")
             }
         }
     }

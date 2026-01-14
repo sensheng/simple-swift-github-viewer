@@ -41,7 +41,6 @@ class MeViewController: UIViewController {
     // MARK: - Setup
     
     private func setupSwiftUIView() {
-        // Create SwiftUI view - 使用完整功能的MeView
         let meView = MeView()
         
         // Create hosting controller
