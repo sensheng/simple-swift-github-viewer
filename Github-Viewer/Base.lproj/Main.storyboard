@@ -12,7 +12,7 @@
         <!--Home-->
         <scene sceneID="wV5-Rg-rbO">
             <objects>
-                <tableViewController title="Home" id="rv4-5F-GwY" customClass="GHVMainViewController" customModule="Github_Viewer" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController title="Home" id="rv4-5F-GwY" customClass="MainViewController" customModule="Github_Viewer" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" id="KUQ-Pa-gc4">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -109,52 +109,6 @@
             </objects>
             <point key="canvasLocation" x="1731" y="401"/>
         </scene>
-        <!--Search-->
-        <scene sceneID="oZq-Ee-oov">
-            <objects>
-                <tableViewController title="Search" id="rvh-ea-M7Z" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" id="UzK-mP-Fct">
-                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                        <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="GTx-Mj-7Wz">
-                                <rect key="frame" x="0.0" y="50" width="393" height="51"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="GTx-Mj-7Wz" id="d2L-oS-XDn">
-                                    <rect key="frame" x="0.0" y="0.0" width="393" height="51"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                </tableViewCellContentView>
-                            </tableViewCell>
-                        </prototypes>
-                        <connections>
-                            <outlet property="dataSource" destination="rvh-ea-M7Z" id="qJt-vF-Q1f"/>
-                            <outlet property="delegate" destination="rvh-ea-M7Z" id="kKq-LJ-gN1"/>
-                        </connections>
-                    </tableView>
-                    <navigationItem key="navigationItem" title="Search" id="vW3-bx-1XP"/>
-                </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="3wB-GF-FJU" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="2636" y="1146"/>
-        </scene>
-        <!--Search-->
-        <scene sceneID="yjS-iz-mHW">
-            <objects>
-                <navigationController id="W9g-bV-0Ma" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Search" image="magnifyingglass" catalog="system" id="f1c-Ch-Rrs"/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="ujW-A5-qZl">
-                        <rect key="frame" x="0.0" y="118" width="393" height="54"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </navigationBar>
-                    <connections>
-                        <segue destination="rvh-ea-M7Z" kind="relationship" relationship="rootViewController" id="xXl-YV-4xn"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="oTU-6z-5cQ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1731" y="1146"/>
-        </scene>
         <!--Home-->
         <scene sceneID="TCJ-Sy-Opj">
             <objects>
@@ -184,7 +138,6 @@
                     <connections>
                         <segue destination="Dv0-JS-FKP" kind="relationship" relationship="viewControllers" id="2iF-Nq-b5n"/>
                         <segue destination="ICG-mF-lqp" kind="relationship" relationship="viewControllers" id="p14-2F-7nG"/>
-                        <segue destination="W9g-bV-0Ma" kind="relationship" relationship="viewControllers" id="EOd-gH-9GV"/>
                     </connections>
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Fel-z9-qqV" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -194,7 +147,6 @@
     </scenes>
     <resources>
         <image name="house" catalog="system" width="128" height="104"/>
-        <image name="magnifyingglass" catalog="system" width="128" height="117"/>
         <image name="person" catalog="system" width="128" height="121"/>
         <namedColor name="AccentColor">
             <color red="0.0" green="0.46000000000000002" blue="0.89000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
