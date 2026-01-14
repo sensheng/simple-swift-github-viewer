@@ -10,13 +10,15 @@ import UIKit
 
 class RepositoryTableViewCell: UITableViewCell {
     
-    // MARK: - UI Components
+    static let identifier = "RepositoryTableViewCell"
+    
+    // MARK: - UI Elements
     
     private let containerView: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor.systemBackground
         view.layer.cornerRadius = 12
-        view.layer.shadowColor = UIColor.label.cgColor
+        view.layer.shadowColor = UIColor.black.cgColor
         view.layer.shadowOffset = CGSize(width: 0, height: 2)
         view.layer.shadowRadius = 4
         view.layer.shadowOpacity = 0.1
@@ -55,7 +57,7 @@ class RepositoryTableViewCell: UITableViewCell {
     private let descriptionLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 14)
-        label.textColor = UIColor.label
+        label.textColor = UIColor.secondaryLabel
         label.numberOfLines = 2
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -63,11 +65,10 @@ class RepositoryTableViewCell: UITableViewCell {
     
     private let languageLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 12)
+        label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         label.textColor = UIColor.white
-        label.backgroundColor = UIColor.systemBlue
         label.textAlignment = .center
-        label.layer.cornerRadius = 8
+        label.layer.cornerRadius = 12
         label.clipsToBounds = true
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -84,8 +85,8 @@ class RepositoryTableViewCell: UITableViewCell {
     
     private let starCountLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
-        label.textColor = UIColor.label
+        label.font = UIFont.systemFont(ofSize: 14)
+        label.textColor = UIColor.secondaryLabel
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -93,7 +94,7 @@ class RepositoryTableViewCell: UITableViewCell {
     private let forkImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(systemName: "tuningfork")
-        imageView.tintColor = UIColor.systemGray
+        imageView.tintColor = UIColor.systemBlue
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
@@ -218,8 +219,8 @@ class RepositoryTableViewCell: UITableViewCell {
         nameLabel.text = repository.name
         ownerLabel.text = repository.owner.login
         descriptionLabel.text = repository.description ?? "无描述"
-        starCountLabel.text = repository.formattedStarCount
-        forkCountLabel.text = repository.formattedForkCount
+        starCountLabel.text = formatCount(repository.stargazersCount)
+        forkCountLabel.text = formatCount(repository.forksCount)
         
         // Configure language label
         if let language = repository.language {
@@ -232,12 +233,28 @@ class RepositoryTableViewCell: UITableViewCell {
         
         // Load avatar image
         avatarImageView.loadImage(
-            from: repository.avatarURL,
+            from: repository.owner.avatarURL,
             placeholder: UIImage(systemName: "person.circle.fill")
         )
     }
     
     // MARK: - Helper Methods
+    
+    private func formatCount(_ count: Int) -> String {
+        if count >= 1000 {
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .decimal
+            formatter.maximumFractionDigits = 1
+            
+            if count >= 1000000 {
+                return "\(formatter.string(from: NSNumber(value: Double(count) / 1000000.0)) ?? "0")M"
+            } else {
+                return "\(formatter.string(from: NSNumber(value: Double(count) / 1000.0)) ?? "0")K"
+            }
+        } else {
+            return "\(count)"
+        }
+    }
     
     private func colorForLanguage(_ language: String) -> UIColor {
         switch language.lowercased() {

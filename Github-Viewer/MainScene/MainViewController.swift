@@ -166,7 +166,7 @@ extension MainViewController: RepositoryViewModelDelegate {
         }
     }
     
-    func repositoryViewModel(_ viewModel: RepositoryViewModel, didFailWithError error: GitHubAPIError) {
+    func repositoryViewModel(_ viewModel: RepositoryViewModel, didFailWithError error: Error) {
         customRefreshControl.endRefreshing()
         
         // Show error alert

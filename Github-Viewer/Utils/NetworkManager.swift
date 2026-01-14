@@ -15,7 +15,7 @@ protocol NetworkManagerProtocol {
         headers: [String: String]?,
         parameters: [String: Any]?,
         responseType: T.Type,
-        completion: @escaping (Result<T, GitHubAPIError>) -> Void
+        completion: @escaping (Result<T, APIError>) -> Void
     )
     
     func buildURL(path: String, queryItems: [URLQueryItem]?) -> URL?
@@ -57,7 +57,7 @@ class NetworkManager: NetworkManagerProtocol {
         headers: [String: String]? = nil,
         parameters: [String: Any]? = nil,
         responseType: T.Type,
-        completion: @escaping (Result<T, GitHubAPIError>) -> Void
+        completion: @escaping (Result<T, APIError>) -> Void
     ) {
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
@@ -96,7 +96,7 @@ class NetworkManager: NetworkManagerProtocol {
         response: URLResponse?,
         error: Error?,
         responseType: T.Type,
-        completion: @escaping (Result<T, GitHubAPIError>) -> Void
+        completion: @escaping (Result<T, APIError>) -> Void
     ) {
         // Handle network error
         if let error = error {
@@ -106,7 +106,7 @@ class NetworkManager: NetworkManagerProtocol {
         
         // Handle HTTP response
         guard let httpResponse = response as? HTTPURLResponse else {
-            completion(.failure(.noData))
+            completion(.failure(.invalidResponse))
             return
         }
         
@@ -121,38 +121,38 @@ class NetworkManager: NetworkManagerProtocol {
             // Check if it's rate limit exceeded
             if let remaining = httpResponse.value(forHTTPHeaderField: Constants.API.rateLimitRemaining),
                remaining == "0" {
-                completion(.failure(.rateLimitExceeded))
+                completion(.failure(.serverError("Rate limit exceeded")))
             } else {
-                completion(.failure(.unauthorized))
+                completion(.failure(.forbidden))
             }
             return
         case 404:
-            completion(.failure(.notFound))
+            completion(.failure(.serverError("Not found")))
             return
         case 422:
             // Validation failed
             if let data = data {
                 do {
-                    let errorResponse = try decoder.decode(GitHubErrorResponse.self, from: data)
-                    completion(.failure(.apiError(errorResponse.message)))
+                    let errorResponse = try decoder.decode(GitHubAPIError.self, from: data)
+                    completion(.failure(.serverError(errorResponse.message)))
                 } catch {
-                    completion(.failure(.serverError(httpResponse.statusCode)))
+                    completion(.failure(.serverError("Validation failed")))
                 }
             } else {
-                completion(.failure(.serverError(httpResponse.statusCode)))
+                completion(.failure(.serverError("Validation failed")))
             }
             return
         case 500...599:
-            completion(.failure(.serverError(httpResponse.statusCode)))
+            completion(.failure(.serverError("Server error \(httpResponse.statusCode)")))
             return
         default:
-            completion(.failure(.serverError(httpResponse.statusCode)))
+            completion(.failure(.serverError("HTTP \(httpResponse.statusCode)")))
             return
         }
         
         // Handle response data
         guard let data = data else {
-            completion(.failure(.noData))
+            completion(.failure(.invalidResponse))
             return
         }
         
@@ -161,7 +161,7 @@ class NetworkManager: NetworkManagerProtocol {
             let decodedResponse = try decoder.decode(responseType, from: data)
             completion(.success(decodedResponse))
         } catch {
-            completion(.failure(.decodingError(error)))
+            completion(.failure(.decodingError))
         }
     }
 }

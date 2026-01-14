@@ -9,34 +9,40 @@
 import Foundation
 import Security
 import LocalAuthentication
+import Combine
 
 protocol AuthManagerProtocol {
     var isLoggedIn: Bool { get }
     var accessToken: String? { get }
     var username: String? { get }
     
-    func login(username: String, password: String, completion: @escaping (Result<Void, AuthError>) -> Void)
-    func loginWithBiometry(completion: @escaping (Result<Void, AuthError>) -> Void)
+    func loginWithToken(_ token: String, completion: @escaping (Result<GitHubUserProfile, AuthError>) -> Void)
+    func loginWithBiometry(completion: @escaping (Result<GitHubUserProfile, AuthError>) -> Void)
     func logout()
-    func saveCredentials(username: String, token: String)
+    func saveCredentials(userProfile: GitHubUserProfile, token: String)
     func isBiometryAvailable() -> Bool
     func getBiometryType() -> LABiometryType
+    func validateCurrentToken(completion: @escaping (Result<GitHubUserProfile, AuthError>) -> Void)
 }
 
 enum AuthError: Error, LocalizedError {
-    case invalidCredentials
+    case invalidToken
+    case tokenExpired
     case networkError(Error)
     case biometryNotAvailable
     case biometryNotEnrolled
     case biometryFailed
     case userCancel
     case keychainError(OSStatus)
+    case apiError(String)
     case unknownError
     
     var errorDescription: String? {
         switch self {
-        case .invalidCredentials:
-            return "用户名或密码错误"
+        case .invalidToken:
+            return "Token 无效或已过期"
+        case .tokenExpired:
+            return "Token 已过期，请重新登录"
         case .networkError(let error):
             return "网络错误: \(error.localizedDescription)"
         case .biometryNotAvailable:
@@ -49,6 +55,8 @@ enum AuthError: Error, LocalizedError {
             return "用户取消操作"
         case .keychainError(let status):
             return "钥匙串错误: \(status)"
+        case .apiError(let message):
+            return message
         case .unknownError:
             return "未知错误"
         }
@@ -60,7 +68,8 @@ class AuthManager: AuthManagerProtocol {
     static let shared = AuthManager()
     
     private let keychain = KeychainManager()
-    private let userDefaults = UserDefaults.standard
+    private let apiService = GitHubAPIService.shared
+    private var cancellables = Set<AnyCancellable>()
     
     private init() {}
     
@@ -80,36 +89,52 @@ class AuthManager: AuthManagerProtocol {
     
     // MARK: - Authentication Methods
     
-    func login(username: String, password: String, completion: @escaping (Result<Void, AuthError>) -> Void) {
-        // Note: GitHub deprecated password authentication for API access
-        // In a real app, you would use OAuth or Personal Access Tokens
-        // For this demo, we'll simulate a successful login with a demo token
-        
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            // Simulate network delay
-            Thread.sleep(forTimeInterval: 1.0)
-            
-            DispatchQueue.main.async {
-                // For demo purposes, accept any non-empty credentials
-                if !username.isEmpty && !password.isEmpty {
-                    // Save demo credentials
-                    self?.saveCredentials(username: username, token: "demo_token_\(username)")
-                    completion(.success(()))
-                } else {
-                    completion(.failure(.invalidCredentials))
+    func loginWithToken(_ token: String, completion: @escaping (Result<GitHubUserProfile, AuthError>) -> Void) {
+        // Validate token by fetching user profile
+        apiService.validateToken(token)
+            .sink(
+                receiveCompletion: { [weak self] completionResult in
+                    switch completionResult {
+                    case .failure(let error):
+                        DispatchQueue.main.async {
+                            if let apiError = error as? APIError {
+                                switch apiError {
+                                case .unauthorized:
+                                    completion(.failure(.invalidToken))
+                                case .forbidden:
+                                    completion(.failure(.apiError("Token 权限不足，请检查权限设置")))
+                                case .serverError(let message):
+                                    completion(.failure(.apiError(message)))
+                                default:
+                                    completion(.failure(.networkError(error)))
+                                }
+                            } else {
+                                completion(.failure(.networkError(error)))
+                            }
+                        }
+                    case .finished:
+                        break
+                    }
+                },
+                receiveValue: { [weak self] userProfile in
+                    DispatchQueue.main.async {
+                        // Save credentials
+                        self?.saveCredentials(userProfile: userProfile, token: token)
+                        completion(.success(userProfile))
+                    }
                 }
-            }
-        }
+            )
+            .store(in: &cancellables)
     }
     
-    func loginWithBiometry(completion: @escaping (Result<Void, AuthError>) -> Void) {
+    func loginWithBiometry(completion: @escaping (Result<GitHubUserProfile, AuthError>) -> Void) {
         guard isBiometryAvailable() else {
             completion(.failure(.biometryNotAvailable))
             return
         }
         
-        guard let savedUsername = username else {
-            completion(.failure(.invalidCredentials))
+        guard let savedToken = accessToken else {
+            completion(.failure(.invalidToken))
             return
         }
         
@@ -119,9 +144,8 @@ class AuthManager: AuthManagerProtocol {
         context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { [weak self] success, error in
             DispatchQueue.main.async {
                 if success {
-                    // Biometry authentication successful
-                    // In a real app, you might need to refresh the token here
-                    completion(.success(()))
+                    // Validate current token
+                    self?.validateCurrentToken(completion: completion)
                 } else {
                     if let error = error as? LAError {
                         switch error.code {
@@ -142,6 +166,46 @@ class AuthManager: AuthManagerProtocol {
         }
     }
     
+    func validateCurrentToken(completion: @escaping (Result<GitHubUserProfile, AuthError>) -> Void) {
+        guard let token = accessToken else {
+            completion(.failure(.invalidToken))
+            return
+        }
+        
+        apiService.getCurrentUser(token: token)
+            .sink(
+                receiveCompletion: { completionResult in
+                    switch completionResult {
+                    case .failure(let error):
+                        DispatchQueue.main.async {
+                            if let apiError = error as? APIError {
+                                switch apiError {
+                                case .unauthorized:
+                                    completion(.failure(.tokenExpired))
+                                case .forbidden:
+                                    completion(.failure(.apiError("Token 权限不足")))
+                                case .serverError(let message):
+                                    completion(.failure(.apiError(message)))
+                                default:
+                                    completion(.failure(.networkError(error)))
+                                }
+                            } else {
+                                completion(.failure(.networkError(error)))
+                            }
+                        }
+                    case .finished:
+                        break
+                    }
+                },
+                receiveValue: { userProfile in
+                    DispatchQueue.main.async {
+                        completion(.success(userProfile))
+                    }
+                }
+            )
+            .store(in: &cancellables)
+    }
+    
     func logout() {
         keychain.delete(for: Constants.KeychainKeys.accessToken)
         keychain.delete(for: Constants.KeychainKeys.username)
@@ -150,13 +214,17 @@ class AuthManager: AuthManagerProtocol {
         // Clear user-specific cache
         CacheManager.shared.clearCache()
         
+        // Cancel any ongoing requests
+        cancellables.removeAll()
+        
         // Post logout notification
         NotificationCenter.default.post(name: .userDidLogout, object: nil)
     }
     
-    func saveCredentials(username: String, token: String) {
+    func saveCredentials(userProfile: GitHubUserProfile, token: String) {
         keychain.set(token, for: Constants.KeychainKeys.accessToken)
-        keychain.set(username, for: Constants.KeychainKeys.username)
+        keychain.set(userProfile.login, for: Constants.KeychainKeys.username)
+        keychain.set(String(userProfile.id), for: Constants.KeychainKeys.userID)
         
         // Post login notification
         NotificationCenter.default.post(name: .userDidLogin, object: nil)

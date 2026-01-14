@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Combine
 
 protocol GitHubServiceProtocol {
     func searchRepositories(
@@ -15,7 +16,7 @@ protocol GitHubServiceProtocol {
         order: String?,
         page: Int,
         perPage: Int,
-        completion: @escaping (Result<GitHubSearchResponse, GitHubAPIError>) -> Void
+        completion: @escaping (Result<GitHubSearchResponse<GitHubRepository>, Error>) -> Void
     )
     
     func getTrendingRepositories(
@@ -23,13 +24,19 @@ protocol GitHubServiceProtocol {
         since: String?,
         page: Int,
         perPage: Int,
-        completion: @escaping (Result<GitHubSearchResponse, GitHubAPIError>) -> Void
+        completion: @escaping (Result<GitHubSearchResponse<GitHubRepository>, Error>) -> Void
     )
     
     func getRepository(
         owner: String,
         repo: String,
-        completion: @escaping (Result<GitHubRepository, GitHubAPIError>) -> Void
+        completion: @escaping (Result<GitHubRepository, Error>) -> Void
+    )
+    
+    func getUserRepositories(
+        page: Int,
+        perPage: Int,
+        completion: @escaping (Result<[GitHubRepository], Error>) -> Void
     )
 }
 
@@ -37,12 +44,13 @@ class GitHubService: GitHubServiceProtocol {
     
     static let shared = GitHubService()
     
-    private let networkManager: NetworkManagerProtocol
+    private let apiService: GitHubAPIServiceProtocol
     private let authManager: AuthManagerProtocol
+    private var cancellables = Set<AnyCancellable>()
     
-    init(networkManager: NetworkManagerProtocol = NetworkManager.shared,
+    init(apiService: GitHubAPIServiceProtocol = GitHubAPIService.shared,
          authManager: AuthManagerProtocol = AuthManager.shared) {
-        self.networkManager = networkManager
+        self.apiService = apiService
         self.authManager = authManager
     }
     
@@ -50,41 +58,31 @@ class GitHubService: GitHubServiceProtocol {
     
     func searchRepositories(
         query: String,
-        sort: String? = Constants.Search.defaultSortBy,
-        order: String? = Constants.Search.defaultOrder,
+        sort: String? = "stars",
+        order: String? = "desc",
         page: Int = 1,
-        perPage: Int = Constants.API.defaultPerPage,
-        completion: @escaping (Result<GitHubSearchResponse, GitHubAPIError>) -> Void
+        perPage: Int = 30,
+        completion: @escaping (Result<GitHubSearchResponse<GitHubRepository>, Error>) -> Void
     ) {
-        var queryItems = [
-            URLQueryItem(name: "q", value: query),
-            URLQueryItem(name: "page", value: "\(page)"),
-            URLQueryItem(name: "per_page", value: "\(min(perPage, Constants.API.maxPerPage))")
-        ]
+        let token = authManager.accessToken
         
-        if let sort = sort {
-            queryItems.append(URLQueryItem(name: "sort", value: sort))
-        }
-        
-        if let order = order {
-            queryItems.append(URLQueryItem(name: "order", value: order))
-        }
-        
-        guard let url = networkManager.buildURL(path: Constants.API.searchRepositories, queryItems: queryItems) else {
-            completion(.failure(.invalidURL))
-            return
-        }
-        
-        let headers = buildHeaders()
-        
-        networkManager.request(
-            url: url,
-            method: .GET,
-            headers: headers,
-            parameters: nil,
-            responseType: GitHubSearchResponse.self,
-            completion: completion
+        apiService.searchRepositories(
+            query: query,
+            token: token,
+            page: page,
+            perPage: perPage
         )
+        .sink(
+            receiveCompletion: { completionResult in
+                if case .failure(let error) = completionResult {
+                    completion(.failure(error))
+                }
+            },
+            receiveValue: { searchResponse in
+                completion(.success(searchResponse))
+            }
+        )
+        .store(in: &cancellables)
     }
     
     // MARK: - Get Trending Repositories
@@ -93,8 +91,8 @@ class GitHubService: GitHubServiceProtocol {
         language: String? = nil,
         since: String? = "daily",
         page: Int = 1,
-        perPage: Int = Constants.API.defaultPerPage,
-        completion: @escaping (Result<GitHubSearchResponse, GitHubAPIError>) -> Void
+        perPage: Int = 30,
+        completion: @escaping (Result<GitHubSearchResponse<GitHubRepository>, Error>) -> Void
     ) {
         // Build query for trending repositories
         var query = "stars:>1"
@@ -140,35 +138,56 @@ class GitHubService: GitHubServiceProtocol {
     func getRepository(
         owner: String,
         repo: String,
-        completion: @escaping (Result<GitHubRepository, GitHubAPIError>) -> Void
+        completion: @escaping (Result<GitHubRepository, Error>) -> Void
     ) {
-        guard let url = networkManager.buildURL(path: "/repos/\(owner)/\(repo)", queryItems: nil) else {
-            completion(.failure(.invalidURL))
+        // For now, we'll use search to find the specific repository
+        // In a full implementation, you'd add a specific endpoint for this
+        let query = "repo:\(owner)/\(repo)"
+        
+        searchRepositories(
+            query: query,
+            sort: nil,
+            order: nil,
+            page: 1,
+            perPage: 1
+        ) { result in
+            switch result {
+            case .success(let searchResponse):
+                if let repository = searchResponse.items.first {
+                    completion(.success(repository))
+                } else {
+                    completion(.failure(APIError.serverError("Repository not found")))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    // MARK: - Get User Repositories
+    
+    func getUserRepositories(
+        page: Int = 1,
+        perPage: Int = 30,
+        completion: @escaping (Result<[GitHubRepository], Error>) -> Void
+    ) {
+        guard let token = authManager.accessToken else {
+            completion(.failure(APIError.unauthorized))
             return
         }
         
-        let headers = buildHeaders()
-        
-        networkManager.request(
-            url: url,
-            method: .GET,
-            headers: headers,
-            parameters: nil,
-            responseType: GitHubRepository.self,
-            completion: completion
-        )
-    }
-    
-    // MARK: - Helper Methods
-    
-    private func buildHeaders() -> [String: String] {
-        var headers: [String: String] = [:]
-        
-        if let token = authManager.accessToken {
-            headers["Authorization"] = "token \(token)"
-        }
-        
-        return headers
+        apiService.getUserRepositories(token: token, page: page, perPage: perPage)
+            .sink(
+                receiveCompletion: { completionResult in
+                    if case .failure(let error) = completionResult {
+                        completion(.failure(error))
+                    }
+                },
+                receiveValue: { repositories in
+                    completion(.success(repositories))
+                }
+            )
+            .store(in: &cancellables)
     }
 }
 
@@ -178,8 +197,8 @@ extension GitHubService {
     func searchRepositoriesByLanguage(
         language: String,
         page: Int = 1,
-        perPage: Int = Constants.API.defaultPerPage,
-        completion: @escaping (Result<GitHubSearchResponse, GitHubAPIError>) -> Void
+        perPage: Int = 30,
+        completion: @escaping (Result<GitHubSearchResponse<GitHubRepository>, Error>) -> Void
     ) {
         let query = "language:\(language) stars:>1"
         searchRepositories(
@@ -195,8 +214,8 @@ extension GitHubService {
     func searchRepositoriesByTopic(
         topic: String,
         page: Int = 1,
-        perPage: Int = Constants.API.defaultPerPage,
-        completion: @escaping (Result<GitHubSearchResponse, GitHubAPIError>) -> Void
+        perPage: Int = 30,
+        completion: @escaping (Result<GitHubSearchResponse<GitHubRepository>, Error>) -> Void
     ) {
         let query = "topic:\(topic) stars:>1"
         searchRepositories(

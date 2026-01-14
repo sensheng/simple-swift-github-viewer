@@ -11,8 +11,8 @@ import Foundation
 protocol CacheManagerProtocol {
     func cacheRepositories(_ repositories: [GitHubRepository], for key: String)
     func getCachedRepositories(for key: String) -> [GitHubRepository]?
-    func cacheSearchResponse(_ response: GitHubSearchResponse, for key: String)
-    func getCachedSearchResponse(for key: String) -> GitHubSearchResponse?
+    func cacheSearchResponse<T: Codable>(_ response: GitHubSearchResponse<T>, for key: String)
+    func getCachedSearchResponse<T: Codable>(for key: String, type: T.Type) -> GitHubSearchResponse<T>?
     func isCacheValid(for key: String) -> Bool
     func clearCache()
     func clearExpiredCache()
@@ -57,13 +57,13 @@ class CacheManager: CacheManagerProtocol {
     
     // MARK: - Search Response Caching
     
-    func cacheSearchResponse(_ response: GitHubSearchResponse, for key: String) {
+    func cacheSearchResponse<T: Codable>(_ response: GitHubSearchResponse<T>, for key: String) {
         let cacheData = CacheData(data: response, timestamp: Date())
         saveCacheData(cacheData, for: key)
     }
     
-    func getCachedSearchResponse(for key: String) -> GitHubSearchResponse? {
-        guard let cacheData: CacheData<GitHubSearchResponse> = loadCacheData(for: key),
+    func getCachedSearchResponse<T: Codable>(for key: String, type: T.Type) -> GitHubSearchResponse<T>? {
+        guard let cacheData: CacheData<GitHubSearchResponse<T>> = loadCacheData(for: key),
               isCacheValid(cacheData.timestamp) else {
             return nil
         }
@@ -73,7 +73,7 @@ class CacheManager: CacheManagerProtocol {
     // MARK: - Cache Validation
     
     func isCacheValid(for key: String) -> Bool {
-        guard let cacheData: CacheData<GitHubSearchResponse> = loadCacheData(for: key) else {
+        guard let cacheData: CacheData<GitHubSearchResponse<GitHubRepository>> = loadCacheData(for: key) else {
             return false
         }
         return isCacheValid(cacheData.timestamp)

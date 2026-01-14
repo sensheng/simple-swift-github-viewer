@@ -11,7 +11,7 @@ import Foundation
 protocol RepositoryViewModelDelegate: AnyObject {
     func repositoryViewModelDidStartLoading(_ viewModel: RepositoryViewModel)
     func repositoryViewModelDidFinishLoading(_ viewModel: RepositoryViewModel)
-    func repositoryViewModel(_ viewModel: RepositoryViewModel, didFailWithError error: GitHubAPIError)
+    func repositoryViewModel(_ viewModel: RepositoryViewModel, didFailWithError error: Error)
     func repositoryViewModel(_ viewModel: RepositoryViewModel, didUpdateRepositories repositories: [GitHubRepository])
     func repositoryViewModel(_ viewModel: RepositoryViewModel, didLoadMoreRepositories repositories: [GitHubRepository])
 }
@@ -152,7 +152,7 @@ class RepositoryViewModel {
     }
     
     private func handleRepositoryResponse(
-        _ result: Result<GitHubSearchResponse, GitHubAPIError>,
+        _ result: Result<GitHubSearchResponse<GitHubRepository>, Error>,
         isLoadMore: Bool,
         cacheKey: String?
     ) {
@@ -175,7 +175,7 @@ class RepositoryViewModel {
     }
     
     private func handleSuccessResponse(
-        _ response: GitHubSearchResponse,
+        _ response: GitHubSearchResponse<GitHubRepository>,
         isLoadMore: Bool,
         cacheKey: String?
     ) {
@@ -211,7 +211,7 @@ class RepositoryViewModel {
     }
     
     private func loadFromCache(key: String) {
-        if let cachedResponse = cacheManager.getCachedSearchResponse(for: key) {
+        if let cachedResponse = cacheManager.getCachedSearchResponse(for: key, type: GitHubRepository.self) {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 self.repositories = cachedResponse.items
