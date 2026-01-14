@@ -1,5 +1,5 @@
 //
-//  GHVMainViewController.swift
+//  MainViewController.swift
 //  Github-Viewer
 //
 //  Created by Xu Sensheng on 2026-01-14.
@@ -114,15 +114,11 @@ class MainViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        
         guard let repository = viewModel.repository(at: indexPath.row) else { return }
-        
-        // Open repository in Safari
-        if let url = URL(string: repository.htmlURL) {
-            UIApplication.shared.open(url)
-        }
+        let detailViewController = RepositoryDetailViewController(repository: repository)
+        navigationController?.pushViewController(detailViewController, animated: true)
     }
-    
+
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         // Add animation for cell appearance
         cell.alpha = 0

@@ -12,6 +12,9 @@ class RepositoryTableViewCell: UITableViewCell {
     
     static let identifier = "RepositoryTableViewCell"
     
+    // MARK: - Properties    
+    private var repository: GitHubRepository?
+    
     // MARK: - UI Elements
     
     private let containerView: UIView = {
@@ -33,24 +36,27 @@ class RepositoryTableViewCell: UITableViewCell {
         imageView.layer.cornerRadius = 20
         imageView.backgroundColor = UIColor.systemGray5
         imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.isUserInteractionEnabled = true
         return imageView
     }()
     
     private let nameLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.boldSystemFont(ofSize: 16)
-        label.textColor = UIColor.label
+        label.textColor = UIColor.systemBlue
         label.numberOfLines = 1
         label.translatesAutoresizingMaskIntoConstraints = false
+        label.isUserInteractionEnabled = true
         return label
     }()
     
     private let ownerLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 14)
-        label.textColor = UIColor.secondaryLabel
+        label.textColor = UIColor.systemBlue
         label.numberOfLines = 1
         label.translatesAutoresizingMaskIntoConstraints = false
+        label.isUserInteractionEnabled = true
         return label
     }()
     
@@ -117,6 +123,14 @@ class RepositoryTableViewCell: UITableViewCell {
         return stackView
     }()
     
+    // Clickable areas
+    private let userClickableArea: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.clear
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     // MARK: - Initialization
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -143,6 +157,9 @@ class RepositoryTableViewCell: UITableViewCell {
         containerView.addSubview(descriptionLabel)
         containerView.addSubview(languageLabel)
         containerView.addSubview(statsStackView)
+        
+        // Add clickable areas
+        containerView.addSubview(userClickableArea)
         
         setupStatsStackView()
         setupConstraints()
@@ -209,13 +226,15 @@ class RepositoryTableViewCell: UITableViewCell {
             starImageView.widthAnchor.constraint(equalToConstant: 16),
             starImageView.heightAnchor.constraint(equalToConstant: 16),
             forkImageView.widthAnchor.constraint(equalToConstant: 16),
-            forkImageView.heightAnchor.constraint(equalToConstant: 16)
+            forkImageView.heightAnchor.constraint(equalToConstant: 16),
         ])
     }
     
     // MARK: - Configuration
     
     func configure(with repository: GitHubRepository) {
+        self.repository = repository
+        
         nameLabel.text = repository.name
         ownerLabel.text = repository.owner.login
         descriptionLabel.text = repository.description ?? "无描述"
@@ -287,6 +306,7 @@ class RepositoryTableViewCell: UITableViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
+        repository = nil
         avatarImageView.image = nil
         nameLabel.text = nil
         ownerLabel.text = nil
@@ -295,5 +315,11 @@ class RepositoryTableViewCell: UITableViewCell {
         starCountLabel.text = nil
         forkCountLabel.text = nil
         languageLabel.isHidden = false
+        
+        // Reset visual feedback
+        userClickableArea.alpha = 1.0
+        userClickableArea.transform = .identity
+        containerView.alpha = 1.0
+        containerView.transform = .identity
     }
 }

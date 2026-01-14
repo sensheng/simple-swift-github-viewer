@@ -117,6 +117,47 @@ struct GitHubAPIError: Codable, Error {
     }
 }
 
+// MARK: - GitHub README Model
+struct GitHubReadme: Codable {
+    let name: String
+    let path: String
+    let sha: String
+    let size: Int
+    let url: String
+    let htmlURL: String
+    let gitURL: String
+    let downloadURL: String?
+    let type: String
+    let content: String
+    let encoding: String
+    
+    enum CodingKeys: String, CodingKey {
+        case name, path, sha, size, url, type, content, encoding
+        case htmlURL = "html_url"
+        case gitURL = "git_url"
+        case downloadURL = "download_url"
+    }
+}
+
+// MARK: - GitHub Contributor Model
+struct GitHubContributor: Codable {
+    let id: Int
+    let login: String
+    let avatarURL: String
+    let htmlURL: String
+    let contributions: Int
+    let type: String
+    
+    enum CodingKeys: String, CodingKey {
+        case id, login, contributions, type
+        case avatarURL = "avatar_url"
+        case htmlURL = "html_url"
+    }
+}
+
+// MARK: - GitHub Language Stats
+typealias GitHubLanguageStats = [String: Int]
+
 // MARK: - Token Validation Response
 struct TokenValidationResponse: Codable {
     let scopes: [String]?

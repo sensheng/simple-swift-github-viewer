@@ -15,6 +15,14 @@ protocol GitHubAPIServiceProtocol {
     func getUserRepositories(token: String, page: Int, perPage: Int) -> AnyPublisher<[GitHubRepository], Error>
     func searchRepositories(query: String, token: String?, page: Int, perPage: Int) -> AnyPublisher<GitHubSearchResponse<GitHubRepository>, Error>
     func searchUsers(query: String, token: String?, page: Int, perPage: Int) -> AnyPublisher<GitHubSearchResponse<GitHubUser>, Error>
+    
+    // New methods for detailed views
+    func getRepository(owner: String, repo: String, token: String?) -> AnyPublisher<GitHubRepository, Error>
+    func getRepositoryReadme(owner: String, repo: String, token: String?) -> AnyPublisher<GitHubReadme, Error>
+    func getRepositoryContributors(owner: String, repo: String, token: String?) -> AnyPublisher<[GitHubContributor], Error>
+    func getRepositoryLanguages(owner: String, repo: String, token: String?) -> AnyPublisher<GitHubLanguageStats, Error>
+    func getUser(username: String, token: String?) -> AnyPublisher<GitHubUserProfile, Error>
+    func getUserRepositories(username: String, token: String?, page: Int, perPage: Int) -> AnyPublisher<[GitHubRepository], Error>
 }
 
 // MARK: - GitHub API Service Implementation
@@ -169,6 +177,210 @@ class GitHubAPIService: GitHubAPIServiceProtocol {
                 return data
             }
             .decode(type: GitHubSearchResponse<GitHubUser>.self, decoder: JSONDecoder())
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+    }
+    
+    // MARK: - Get Repository Details
+    func getRepository(owner: String, repo: String, token: String? = nil) -> AnyPublisher<GitHubRepository, Error> {
+        guard let url = URL(string: "\(baseURL)/repos/\(owner)/\(repo)") else {
+            return Fail(error: APIError.invalidURL)
+                .eraseToAnyPublisher()
+        }
+        
+        var request = URLRequest(url: url)
+        if let token = token {
+            request.setValue("token \(token)", forHTTPHeaderField: "Authorization")
+        }
+        request.setValue("application/vnd.github.v3+json", forHTTPHeaderField: "Accept")
+        request.setValue("Github-Viewer-iOS/1.0", forHTTPHeaderField: "User-Agent")
+        
+        return session.dataTaskPublisher(for: request)
+            .tryMap { data, response -> Data in
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    throw APIError.invalidResponse
+                }
+                
+                if !(200...299).contains(httpResponse.statusCode) {
+                    if let errorResponse = try? JSONDecoder().decode(GitHubAPIError.self, from: data) {
+                        throw APIError.serverError(errorResponse.message)
+                    }
+                    throw APIError.serverError("HTTP \(httpResponse.statusCode)")
+                }
+                
+                return data
+            }
+            .decode(type: GitHubRepository.self, decoder: JSONDecoder())
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+    }
+    
+    // MARK: - Get Repository README
+    func getRepositoryReadme(owner: String, repo: String, token: String? = nil) -> AnyPublisher<GitHubReadme, Error> {
+        guard let url = URL(string: "\(baseURL)/repos/\(owner)/\(repo)/readme") else {
+            return Fail(error: APIError.invalidURL)
+                .eraseToAnyPublisher()
+        }
+        
+        var request = URLRequest(url: url)
+        if let token = token {
+            request.setValue("token \(token)", forHTTPHeaderField: "Authorization")
+        }
+        request.setValue("application/vnd.github.v3+json", forHTTPHeaderField: "Accept")
+        request.setValue("Github-Viewer-iOS/1.0", forHTTPHeaderField: "User-Agent")
+        
+        return session.dataTaskPublisher(for: request)
+            .tryMap { data, response -> Data in
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    throw APIError.invalidResponse
+                }
+                
+                if !(200...299).contains(httpResponse.statusCode) {
+                    if let errorResponse = try? JSONDecoder().decode(GitHubAPIError.self, from: data) {
+                        throw APIError.serverError(errorResponse.message)
+                    }
+                    throw APIError.serverError("HTTP \(httpResponse.statusCode)")
+                }
+                
+                return data
+            }
+            .decode(type: GitHubReadme.self, decoder: JSONDecoder())
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+    }
+    
+    // MARK: - Get Repository Contributors
+    func getRepositoryContributors(owner: String, repo: String, token: String? = nil) -> AnyPublisher<[GitHubContributor], Error> {
+        guard let url = URL(string: "\(baseURL)/repos/\(owner)/\(repo)/contributors") else {
+            return Fail(error: APIError.invalidURL)
+                .eraseToAnyPublisher()
+        }
+        
+        var request = URLRequest(url: url)
+        if let token = token {
+            request.setValue("token \(token)", forHTTPHeaderField: "Authorization")
+        }
+        request.setValue("application/vnd.github.v3+json", forHTTPHeaderField: "Accept")
+        request.setValue("Github-Viewer-iOS/1.0", forHTTPHeaderField: "User-Agent")
+        
+        return session.dataTaskPublisher(for: request)
+            .tryMap { data, response -> Data in
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    throw APIError.invalidResponse
+                }
+                
+                if !(200...299).contains(httpResponse.statusCode) {
+                    if let errorResponse = try? JSONDecoder().decode(GitHubAPIError.self, from: data) {
+                        throw APIError.serverError(errorResponse.message)
+                    }
+                    throw APIError.serverError("HTTP \(httpResponse.statusCode)")
+                }
+                
+                return data
+            }
+            .decode(type: [GitHubContributor].self, decoder: JSONDecoder())
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+    }
+    
+    // MARK: - Get Repository Languages
+    func getRepositoryLanguages(owner: String, repo: String, token: String? = nil) -> AnyPublisher<GitHubLanguageStats, Error> {
+        guard let url = URL(string: "\(baseURL)/repos/\(owner)/\(repo)/languages") else {
+            return Fail(error: APIError.invalidURL)
+                .eraseToAnyPublisher()
+        }
+        
+        var request = URLRequest(url: url)
+        if let token = token {
+            request.setValue("token \(token)", forHTTPHeaderField: "Authorization")
+        }
+        request.setValue("application/vnd.github.v3+json", forHTTPHeaderField: "Accept")
+        request.setValue("Github-Viewer-iOS/1.0", forHTTPHeaderField: "User-Agent")
+        
+        return session.dataTaskPublisher(for: request)
+            .tryMap { data, response -> Data in
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    throw APIError.invalidResponse
+                }
+                
+                if !(200...299).contains(httpResponse.statusCode) {
+                    if let errorResponse = try? JSONDecoder().decode(GitHubAPIError.self, from: data) {
+                        throw APIError.serverError(errorResponse.message)
+                    }
+                    throw APIError.serverError("HTTP \(httpResponse.statusCode)")
+                }
+                
+                return data
+            }
+            .decode(type: GitHubLanguageStats.self, decoder: JSONDecoder())
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+    }
+    
+    // MARK: - Get User Profile
+    func getUser(username: String, token: String? = nil) -> AnyPublisher<GitHubUserProfile, Error> {
+        guard let url = URL(string: "\(baseURL)/users/\(username)") else {
+            return Fail(error: APIError.invalidURL)
+                .eraseToAnyPublisher()
+        }
+        
+        var request = URLRequest(url: url)
+        if let token = token {
+            request.setValue("token \(token)", forHTTPHeaderField: "Authorization")
+        }
+        request.setValue("application/vnd.github.v3+json", forHTTPHeaderField: "Accept")
+        request.setValue("Github-Viewer-iOS/1.0", forHTTPHeaderField: "User-Agent")
+        
+        return session.dataTaskPublisher(for: request)
+            .tryMap { data, response -> Data in
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    throw APIError.invalidResponse
+                }
+                
+                if !(200...299).contains(httpResponse.statusCode) {
+                    if let errorResponse = try? JSONDecoder().decode(GitHubAPIError.self, from: data) {
+                        throw APIError.serverError(errorResponse.message)
+                    }
+                    throw APIError.serverError("HTTP \(httpResponse.statusCode)")
+                }
+                
+                return data
+            }
+            .decode(type: GitHubUserProfile.self, decoder: JSONDecoder())
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+    }
+    
+    // MARK: - Get User Repositories by Username
+    func getUserRepositories(username: String, token: String? = nil, page: Int = 1, perPage: Int = 30) -> AnyPublisher<[GitHubRepository], Error> {
+        guard let url = URL(string: "\(baseURL)/users/\(username)/repos?page=\(page)&per_page=\(perPage)&sort=updated") else {
+            return Fail(error: APIError.invalidURL)
+                .eraseToAnyPublisher()
+        }
+        
+        var request = URLRequest(url: url)
+        if let token = token {
+            request.setValue("token \(token)", forHTTPHeaderField: "Authorization")
+        }
+        request.setValue("application/vnd.github.v3+json", forHTTPHeaderField: "Accept")
+        request.setValue("Github-Viewer-iOS/1.0", forHTTPHeaderField: "User-Agent")
+        
+        return session.dataTaskPublisher(for: request)
+            .tryMap { data, response -> Data in
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    throw APIError.invalidResponse
+                }
+                
+                if !(200...299).contains(httpResponse.statusCode) {
+                    if let errorResponse = try? JSONDecoder().decode(GitHubAPIError.self, from: data) {
+                        throw APIError.serverError(errorResponse.message)
+                    }
+                    throw APIError.serverError("HTTP \(httpResponse.statusCode)")
+                }
+                
+                return data
+            }
+            .decode(type: [GitHubRepository].self, decoder: JSONDecoder())
             .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
     }
