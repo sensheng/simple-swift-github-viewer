@@ -10,6 +10,7 @@ import Foundation
 import Security
 import LocalAuthentication
 import Combine
+import UIKit
 
 protocol AuthManagerProtocol {
     var isLoggedIn: Bool { get }
@@ -75,7 +76,24 @@ class AuthManager: AuthManagerProtocol {
     private let apiService = GitHubAPIService.shared
     private var cancellables = Set<AnyCancellable>()
     
-    private init() {}
+    private var temporaryToken: String?
+    private var hasEverSavedToken: Bool = false
+    
+    private init() {
+        // 初始化时检查是否曾经保存过token
+        let tokenSavedFlag = keychain.getString(for: Constants.KeychainKeys.tokenSaved)
+        hasEverSavedToken = tokenSavedFlag == "true"
+        
+        if tokenSavedFlag == "temporary" {
+            keychain.delete(for: Constants.KeychainKeys.accessToken)
+            keychain.delete(for: Constants.KeychainKeys.username)
+            keychain.delete(for: Constants.KeychainKeys.userID)
+            keychain.delete(for: Constants.KeychainKeys.tokenSaved)
+        }
+        
+        let deviceType = UIDevice.current.userInterfaceIdiom == .pad ? "iPad" : "iPhone"
+        print("🔍 [AuthManager] init - Device: \(deviceType), hasEverSavedToken: \(hasEverSavedToken)")
+    }
     
     // MARK: - Public Properties
     
@@ -84,7 +102,10 @@ class AuthManager: AuthManagerProtocol {
     }
     
     var accessToken: String? {
-        return keychain.getString(for: Constants.KeychainKeys.accessToken)
+        let keychainToken = keychain.getString(for: Constants.KeychainKeys.accessToken)
+        let finalToken = keychainToken ?? temporaryToken
+        
+        return finalToken
     }
     
     var username: String? {
@@ -135,15 +156,28 @@ class AuthManager: AuthManagerProtocol {
     }
     
     func loginWithBiometry(completion: @escaping (Result<GitHubUserProfile, AuthError>) -> Void) {
+        let deviceType = UIDevice.current.userInterfaceIdiom == .pad ? "iPad" : "iPhone"
+        print("🔍 [AuthManager] loginWithBiometry called - Device: \(deviceType)")
+        
         guard isBiometryAvailable() else {
+            print("🔍 [AuthManager] Biometry not available - Device: \(deviceType)")
             completion(.failure(.biometryNotAvailable))
             return
         }
         
-        guard hasTokenSaved else {
+        let tokenSavedFlag = keychain.getString(for: Constants.KeychainKeys.tokenSaved)
+        guard hasEverSavedToken || tokenSavedFlag == "true" || tokenSavedFlag == "temporary" else {
             completion(.failure(.invalidToken))
             return
         }
+        
+        let keychainToken = keychain.getString(for: Constants.KeychainKeys.accessToken)
+        guard let token = keychainToken, !token.isEmpty else {
+            completion(.failure(.apiError("未找到保存的登录信息，请重新输入Token登录")))
+            return
+        }
+        
+        print("🔍 [AuthManager] Starting biometry authentication - Device: \(deviceType)")
         
         let context = LAContext()
         let reason = "使用生物识别登录 GitHub Viewer"
@@ -174,6 +208,7 @@ class AuthManager: AuthManagerProtocol {
     }
     
     func validateCurrentToken(completion: @escaping (Result<GitHubUserProfile, AuthError>) -> Void) {
+        
         guard let token = accessToken else {
             completion(.failure(.invalidToken))
             return
@@ -219,6 +254,10 @@ class AuthManager: AuthManagerProtocol {
         keychain.delete(for: Constants.KeychainKeys.userID)
         keychain.delete(for: Constants.KeychainKeys.tokenSaved)
         
+        // Clear temporary token and reset saved token flag
+        temporaryToken = nil
+        hasEverSavedToken = false
+        
         // Clear user-specific cache
         CacheManager.shared.clearCache()
         
@@ -237,18 +276,21 @@ class AuthManager: AuthManagerProtocol {
     }
     
     func saveCredentialsQuietly(userProfile: GitHubUserProfile, token: String, shouldSave: Bool) {
+        let deviceType = UIDevice.current.userInterfaceIdiom == .pad ? "iPad" : "iPhone"
+        
+        keychain.set(token, for: Constants.KeychainKeys.accessToken)
+        keychain.set(userProfile.login, for: Constants.KeychainKeys.username)
+        keychain.set(String(userProfile.id), for: Constants.KeychainKeys.userID)
+        
         if shouldSave {
-            // Save login token to keychain
-            keychain.set(token, for: Constants.KeychainKeys.accessToken)
-            keychain.set(userProfile.login, for: Constants.KeychainKeys.username)
-            keychain.set(String(userProfile.id), for: Constants.KeychainKeys.userID)
             keychain.set("true", for: Constants.KeychainKeys.tokenSaved)
+            hasEverSavedToken = true
+            temporaryToken = nil  // 清除临时token
+            print("🔍 [AuthManager] Token saved permanently - Device: \(deviceType)")
         } else {
-            // Ensure token is cleaned from keychain
-            keychain.delete(for: Constants.KeychainKeys.accessToken)
-            keychain.delete(for: Constants.KeychainKeys.username)
-            keychain.delete(for: Constants.KeychainKeys.userID)
-            keychain.delete(for: Constants.KeychainKeys.tokenSaved)
+            keychain.set("temporary", for: Constants.KeychainKeys.tokenSaved)
+            temporaryToken = nil  // 不需要临时token，因为已经在keychain中了
+            print("🔍 [AuthManager] Token saved temporarily (will be cleared on next startup) - Device: \(deviceType)")
         }
     }
     
@@ -273,16 +315,10 @@ class AuthManager: AuthManagerProtocol {
     }
     
     func checkForSavedToken() -> Bool {
-        guard let token = accessToken, !token.isEmpty else {
-            return false
-        }
+        let tokenSavedFlag = keychain.getString(for: Constants.KeychainKeys.tokenSaved)
+        let everSaved = hasEverSavedToken || tokenSavedFlag == "true" || tokenSavedFlag == "temporary"
         
-        if keychain.getString(for: Constants.KeychainKeys.tokenSaved) != nil {
-            return hasTokenSaved
-        }
-        
-        keychain.set("true", for: Constants.KeychainKeys.tokenSaved)
-        return true
+        return everSaved
     }
     
     func requestBiometryPermission(completion: @escaping (Result<Bool, AuthError>) -> Void) {

@@ -116,7 +116,7 @@ class MeViewModel: ObservableObject {
     private func validateCurrentTokenSilently() {
         // This method is no longer used for initial login
         // Keep it for manual refresh operations
-        guard let token = authManager.accessToken else {
+        guard (authManager.accessToken) != nil else {
             loginState = .notLoggedIn
             return
         }

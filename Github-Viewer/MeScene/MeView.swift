@@ -18,11 +18,19 @@ protocol MeViewNavigationDelegate: AnyObject {
 
 struct MeView: View {
     
-    @StateObject var viewModel = MeViewModel()
+    @ObservedObject var viewModel: MeViewModel  // compatible for UIKit reference
     @State private var showingErrorAlert = false
     weak var navigationDelegate: MeViewNavigationDelegate?
     
-    var body: some View {
+    init(viewModel: MeViewModel) {
+        self.viewModel = viewModel
+    }
+    
+    init() {
+        self.viewModel = MeViewModel()
+    }
+    
+    var body: some View {        
         ZStack {
             // Background
             Color(.systemGroupedBackground)
@@ -664,7 +672,7 @@ struct UserRepositoriesSection: View {
                     ForEach(viewModel.userRepositories.prefix(5), id: \.id) { repository in
                         UserRepositoryCard(repository: repository, navigationDelegate: navigationDelegate)
                     }
-                    
+
                     // Show More Button if there are more repositories
                     if viewModel.userRepositories.count > 5 {
                         Button(action: {

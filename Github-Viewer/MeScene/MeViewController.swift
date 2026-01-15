@@ -16,6 +16,7 @@ class MeViewController: UIViewController {
     
     private var hostingController: UIHostingController<MeView>!
     private var meView: MeView!
+    private var viewModel: MeViewModel!
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Lifecycle
@@ -47,7 +48,9 @@ class MeViewController: UIViewController {
     
     private func setupSwiftUIView() {
         title = "我的"
-        meView = MeView()
+        
+        viewModel = MeViewModel()
+        meView = MeView(viewModel: viewModel)
         meView.navigationDelegate = self
         
         // Create hosting controller
@@ -92,13 +95,23 @@ class MeViewController: UIViewController {
             logoutButton.tintColor = .systemRed
             
             navigationItem.rightBarButtonItems = [logoutButton, refreshButton]
+            print("🔍 [MeViewController] Navigation bar buttons created. Count: \(navigationItem.rightBarButtonItems?.count ?? 0)")
+            
+            // Force layout update for iPad
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                DispatchQueue.main.async { [weak self] in
+                    self?.navigationController?.navigationBar.setNeedsLayout()
+                    self?.navigationController?.navigationBar.layoutIfNeeded()
+                    print("🔍 [MeViewController] Forced navigation bar layout update for iPad")
+                }
+            }
         } else {
             navigationItem.rightBarButtonItems = nil
         }
     }
     
     @objc private func refreshButtonTapped() {
-        meView?.viewModel.refreshProfile()
+        viewModel.refreshProfile()
     }
     
     @objc private func logoutButtonTapped() {
@@ -110,7 +123,7 @@ class MeViewController: UIViewController {
         
         alert.addAction(UIAlertAction(title: "取消", style: .cancel))
         alert.addAction(UIAlertAction(title: "退出", style: .destructive) { [weak self] _ in
-            self?.meView?.viewModel.logout()
+            self?.viewModel.logout()
             self?.navigationItem.rightBarButtonItems = nil
         })
         
