@@ -114,6 +114,7 @@ struct LoginView: View {
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .autocapitalization(.none)
                             .disableAutocorrection(true)
+                            .accessibilityIdentifier("tokenTextField")
                     }
                     
                     // Login Button
@@ -137,6 +138,7 @@ struct LoginView: View {
                         .cornerRadius(10)
                     }
                     .disabled(viewModel.isLoading || viewModel.accessToken.isEmpty)
+                    .accessibilityIdentifier("loginButton")
                     
                     // Biometry Login Button
                     if viewModel.showBiometryLogin {

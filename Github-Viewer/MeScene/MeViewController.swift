@@ -93,6 +93,7 @@ class MeViewController: UIViewController {
             )
             
             logoutButton.tintColor = .systemRed
+            logoutButton.accessibilityIdentifier = "logoutButton"
             
             navigationItem.rightBarButtonItems = [logoutButton, refreshButton]
             print("🔍 [MeViewController] Navigation bar buttons created. Count: \(navigationItem.rightBarButtonItems?.count ?? 0)")
