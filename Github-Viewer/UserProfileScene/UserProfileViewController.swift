@@ -501,7 +501,7 @@ extension UserProfileViewController: UserProfileViewModelDelegate {
         tableView.reloadData()
         
         // Scroll to top if this is a new load
-        if !repositories.isEmpty {
+        if refreshControl.isRefreshing {
             tableView.scrollToTop(animated: false)
         }
     }
