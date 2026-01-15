@@ -43,6 +43,10 @@ class MeViewModel: ObservableObject {
     @Published var pendingUserProfile: GitHubUserProfile?
     @Published var pendingToken: String = ""
     
+    // User repositories
+    @Published var userRepositories: [GitHubRepository] = []
+    @Published var isLoadingRepositories: Bool = false
+    
     // MARK: - Private Properties
     
     private let authManager: AuthManagerProtocol
@@ -98,11 +102,37 @@ class MeViewModel: ObservableObject {
     }
     
     private func checkInitialLoginState() {
-        if authManager.checkForSavedToken() {
-            // Auto login if needed
-            loginWithBiometry()
+        if authManager.checkForSavedToken() && authManager.isBiometryAvailable() {
+            // If we have a saved token and biometry is available, 
+            // automatically prompt for biometric authentication
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                self?.loginWithBiometry()
+            }
         } else {
             loginState = .notLoggedIn
+        }
+    }
+    
+    private func validateCurrentTokenSilently() {
+        // This method is no longer used for initial login
+        // Keep it for manual refresh operations
+        guard let token = authManager.accessToken else {
+            loginState = .notLoggedIn
+            return
+        }
+        
+        // Validate token silently in background
+        authManager.validateCurrentToken { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let userProfile):
+                    self?.loginState = .loggedIn(userProfile)
+                    self?.loadUserRepositories()
+                case .failure:
+                    // Token is invalid, show login screen
+                    self?.loginState = .notLoggedIn
+                }
+            }
         }
     }
     
@@ -169,6 +199,9 @@ class MeViewModel: ObservableObject {
         loginState = .loggedIn(userProfile)
         accessToken = "" // Clear token from UI for security
         
+        // Load user repositories
+        loadUserRepositories()
+        
         // Clean up
         pendingUserProfile = nil
         pendingToken = ""
@@ -213,6 +246,7 @@ class MeViewModel: ObservableObject {
                 switch result {
                 case .success(let userProfile):
                     self?.loginState = .loggedIn(userProfile)
+                    self?.loadUserRepositories()
                 case .failure(let error):
                     if case .userCancel = error {
                         // User cancelled, don't show error
@@ -232,6 +266,34 @@ class MeViewModel: ObservableObject {
     func refreshProfile() {
         guard loginState.isLoggedIn else { return }
         validateAndLoadProfile()
+        loadUserRepositories()
+    }
+    
+    func loadUserRepositories() {
+        guard case .loggedIn(let userProfile) = loginState,
+              let token = authManager.accessToken else { return }
+        
+        isLoadingRepositories = true
+        
+        apiService.getUserRepositories(
+            username: userProfile.login,
+            token: token,
+            page: 1,
+            perPage: 30
+        )
+        .receive(on: DispatchQueue.main)
+        .sink(
+            receiveCompletion: { [weak self] completion in
+                self?.isLoadingRepositories = false
+                if case .failure(let error) = completion {
+                    print("⚠️ Failed to load user repositories: \(error)")
+                }
+            },
+            receiveValue: { [weak self] repositories in
+                self?.userRepositories = repositories
+            }
+        )
+        .store(in: &cancellables)
     }
     
     func clearError() {
@@ -268,6 +330,8 @@ class MeViewModel: ObservableObject {
         showTokenSaveAlert = false
         pendingUserProfile = nil
         pendingToken = ""
+        userRepositories = []
+        isLoadingRepositories = false
     }
     
     private func validateAndLoadProfile() {
@@ -280,6 +344,7 @@ class MeViewModel: ObservableObject {
                 switch result {
                 case .success(let userProfile):
                     self?.loginState = .loggedIn(userProfile)
+                    self?.loadUserRepositories()
                 case .failure(let error):
                     // Token is invalid or expired, logout
                     self?.authManager.logout()

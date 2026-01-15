@@ -8,12 +8,15 @@
 
 import UIKit
 import SwiftUI
+import Combine
 
 class MeViewController: UIViewController {
     
     // MARK: - Properties
     
     private var hostingController: UIHostingController<MeView>!
+    private var meView: MeView!
+    private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Lifecycle
     
@@ -22,26 +25,30 @@ class MeViewController: UIViewController {
         
         setupSwiftUIView()
         setupNavigationBar()
+        observeLoginState()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        // Hide navigation bar since SwiftUI view has its own navigation
-        navigationController?.setNavigationBarHidden(true, animated: animated)
+        // Show navigation bar and setup buttons
+        navigationController?.setNavigationBarHidden(false, animated: animated)
+        setupNavigationBarButtons()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
-        // Show navigation bar when leaving this view
-        navigationController?.setNavigationBarHidden(false, animated: animated)
+        // Clear navigation bar buttons when leaving
+        navigationItem.rightBarButtonItems = nil
     }
     
     // MARK: - Setup
     
     private func setupSwiftUIView() {
-        let meView = MeView()
+        title = "我的"
+        meView = MeView()
+        meView.navigationDelegate = self
         
         // Create hosting controller
         hostingController = UIHostingController(rootView: meView)
@@ -65,6 +72,68 @@ class MeViewController: UIViewController {
         hostingController.view.backgroundColor = UIColor.clear
     }
     
+    private func setupNavigationBarButtons() {
+        // Check if user is logged in through AuthManager instead of accessing StateObject
+        if AuthManager.shared.checkForSavedToken() && AuthManager.shared.accessToken != nil {
+            let refreshButton = UIBarButtonItem(
+                image: UIImage(systemName: "arrow.clockwise"),
+                style: .plain,
+                target: self,
+                action: #selector(refreshButtonTapped)
+            )
+            
+            let logoutButton = UIBarButtonItem(
+                image: UIImage(systemName: "rectangle.portrait.and.arrow.right"),
+                style: .plain,
+                target: self,
+                action: #selector(logoutButtonTapped)
+            )
+            
+            logoutButton.tintColor = .systemRed
+            
+            navigationItem.rightBarButtonItems = [logoutButton, refreshButton]
+        } else {
+            navigationItem.rightBarButtonItems = nil
+        }
+    }
+    
+    @objc private func refreshButtonTapped() {
+        meView?.viewModel.refreshProfile()
+    }
+    
+    @objc private func logoutButtonTapped() {
+        let alert = UIAlertController(
+            title: "退出登录",
+            message: "确定要退出登录吗？",
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "取消", style: .cancel))
+        alert.addAction(UIAlertAction(title: "退出", style: .destructive) { [weak self] _ in
+            self?.meView?.viewModel.logout()
+            self?.navigationItem.rightBarButtonItems = nil
+        })
+        
+        present(alert, animated: true)
+    }
+    
+    private func observeLoginState() {
+        // Listen for login/logout notifications instead of accessing StateObject
+        NotificationCenter.default.publisher(for: .userDidLogin)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.setupNavigationBarButtons()
+            }
+            .store(in: &cancellables)
+        
+        NotificationCenter.default.publisher(for: .userDidLogout)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.setupNavigationBarButtons()
+            }
+            .store(in: &cancellables)
+    }
+    
     private func setupNavigationBar() {
         // Configure tab bar item
         tabBarItem = UITabBarItem(
@@ -72,5 +141,15 @@ class MeViewController: UIViewController {
             image: UIImage(systemName: "person"),
             selectedImage: UIImage(systemName: "person.fill")
         )
+    }
+}
+
+// MARK: - MeViewNavigationDelegate
+
+extension MeViewController: MeViewNavigationDelegate {
+    
+    func navigateToRepositoryDetail(_ repository: GitHubRepository) {
+        let detailViewController = RepositoryDetailViewController(repository: repository)
+        navigationController?.pushViewController(detailViewController, animated: true)
     }
 }

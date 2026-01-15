@@ -10,34 +10,37 @@ import SwiftUI
 import Combine
 import LocalAuthentication
 
+// MARK: - Navigation Delegate Protocol
+
+protocol MeViewNavigationDelegate: AnyObject {
+    func navigateToRepositoryDetail(_ repository: GitHubRepository)
+}
+
 struct MeView: View {
     
-    @StateObject private var viewModel = MeViewModel()
+    @StateObject var viewModel = MeViewModel()
     @State private var showingErrorAlert = false
+    weak var navigationDelegate: MeViewNavigationDelegate?
     
     var body: some View {
-        NavigationView {
-            ZStack {
-                // Background
-                Color(.systemGroupedBackground)
-                    .ignoresSafeArea()
-                
-                // Content
-                switch viewModel.loginState {
-                case .notLoggedIn:
-                    LoginView(viewModel: viewModel)
-                case .loggingIn:
-                    LoadingView(message: "登录中...")
-                case .loggedIn(let userProfile):
-                    ProfileView(userProfile: userProfile, viewModel: viewModel)
-                case .waitingForSaveChoice(let userProfile):
-                    ProfileView(userProfile: userProfile, viewModel: viewModel)
-                case .error(let errorMessage):
-                    ErrorView(message: errorMessage, viewModel: viewModel)
-                }
+        ZStack {
+            // Background
+            Color(.systemGroupedBackground)
+                .ignoresSafeArea()
+            
+            // Content
+            switch viewModel.loginState {
+            case .notLoggedIn:
+                LoginView(viewModel: viewModel)
+            case .loggingIn:
+                LoadingView(message: "登录中...")
+            case .loggedIn(let userProfile):
+                ProfileView(userProfile: userProfile, viewModel: viewModel, navigationDelegate: navigationDelegate)
+            case .waitingForSaveChoice(let userProfile):
+                ProfileView(userProfile: userProfile, viewModel: viewModel, navigationDelegate: navigationDelegate)
+            case .error(let errorMessage):
+                ErrorView(message: errorMessage, viewModel: viewModel)
             }
-            .navigationTitle("我的")
-            .navigationBarTitleDisplayMode(.large)
         }
         .alert(isPresented: $viewModel.showTokenSaveAlert) {
             Alert(
@@ -180,6 +183,7 @@ struct ProfileView: View {
     
     let userProfile: GitHubUserProfile
     @ObservedObject var viewModel: MeViewModel
+    weak var navigationDelegate: MeViewNavigationDelegate?
     
     var body: some View {
         ScrollView {
@@ -213,37 +217,8 @@ struct ProfileView: View {
                     }
                 }
                 
-                // Actions
-                VStack(spacing: 12) {
-                    Button(action: {
-                        viewModel.refreshProfile()
-                    }) {
-                        HStack {
-                            Image(systemName: "arrow.clockwise")
-                            Text("刷新资料")
-                        }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 50)
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                    }
-                    .disabled(viewModel.isLoading)
-                    
-                    Button(action: {
-                        viewModel.logout()
-                    }) {
-                        HStack {
-                            Image(systemName: "rectangle.portrait.and.arrow.right")
-                            Text("退出登录")
-                        }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 50)
-                        .background(Color(.systemGray6))
-                        .foregroundColor(.red)
-                        .cornerRadius(10)
-                    }
-                }
+                // User Repositories Section
+                UserRepositoriesSection(viewModel: viewModel, navigationDelegate: navigationDelegate)
                 
                 Spacer(minLength: 40)
             }
@@ -636,6 +611,182 @@ struct PermissionRow: View {
             
             Spacer()
         }
+    }
+}
+
+// MARK: - User Repositories Section
+
+struct UserRepositoriesSection: View {
+    
+    @ObservedObject var viewModel: MeViewModel
+    weak var navigationDelegate: MeViewNavigationDelegate?
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // Section Header
+            HStack {
+                Text("我的项目")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                
+                Spacer()
+                
+                if viewModel.isLoadingRepositories {
+                    ProgressView()
+                        .scaleEffect(0.8)
+                }
+            }
+            
+            // Repositories List
+            if viewModel.userRepositories.isEmpty && !viewModel.isLoadingRepositories {
+                // Empty State
+                VStack(spacing: 12) {
+                    Image(systemName: "folder")
+                        .font(.system(size: 40))
+                        .foregroundColor(.secondary)
+                    
+                    Text("暂无项目")
+                        .font(.headline)
+                        .foregroundColor(.secondary)
+                    
+                    Text("您还没有创建任何项目")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 40)
+                .background(Color(.systemGray6))
+                .cornerRadius(12)
+            } else {
+                // Repository Cards
+                LazyVStack(spacing: 12) {
+                    ForEach(viewModel.userRepositories.prefix(5), id: \.id) { repository in
+                        UserRepositoryCard(repository: repository, navigationDelegate: navigationDelegate)
+                    }
+                    
+                    // Show More Button if there are more repositories
+                    if viewModel.userRepositories.count > 5 {
+                        Button(action: {
+                            // TODO: Navigate to full repository list
+                        }) {
+                            HStack {
+                                Text("查看全部 \(viewModel.userRepositories.count) 个项目")
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                            }
+                            .padding()
+                            .background(Color(.systemGray6))
+                            .cornerRadius(12)
+                        }
+                        .foregroundColor(.primary)
+                    }
+                }
+            }
+        }
+        .padding(.top, 8)
+    }
+}
+
+// MARK: - User Repository Card
+
+struct UserRepositoryCard: View {
+    
+    let repository: GitHubRepository
+    weak var navigationDelegate: MeViewNavigationDelegate?
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Repository Name and Visibility
+            HStack {
+                Text(repository.name)
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                    .lineLimit(1)
+                
+                Spacer()
+                
+                // Visibility Badge
+                Text(repository.isPrivate ? "私有" : "公开")
+                    .font(.caption)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(repository.isPrivate ? Color.orange : Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(6)
+            }
+            
+            // Description
+            if let description = repository.description, !description.isEmpty {
+                Text(description)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
+            }
+            
+            // Stats
+            HStack(spacing: 16) {
+                if let language = repository.language {
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(Color.blue)
+                            .frame(width: 8, height: 8)
+                        Text(language)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                
+                HStack(spacing: 4) {
+                    Image(systemName: "star")
+                        .font(.caption)
+                    Text("\(repository.stargazersCount)")
+                        .font(.caption)
+                }
+                .foregroundColor(.secondary)
+                
+                HStack(spacing: 4) {
+                    Image(systemName: "tuningfork")
+                        .font(.caption)
+                    Text("\(repository.forksCount)")
+                        .font(.caption)
+                }
+                .foregroundColor(.secondary)
+                
+                Spacer()
+                
+                Text(repository.updatedAt.toDate()?.timeAgoDisplay() ?? "未知时间")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+        .onTapGesture {
+            navigationDelegate?.navigateToRepositoryDetail(repository)
+        }
+    }
+}
+
+// MARK: - Date Extension
+
+extension Date {
+    func timeAgoDisplay() -> String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .abbreviated
+        formatter.locale = Locale(identifier: "zh_CN")
+        return formatter.localizedString(for: self, relativeTo: Date())
+    }
+}
+
+// MARK: - String Extension
+
+extension String {
+    func toDate() -> Date? {
+        let formatter = ISO8601DateFormatter()
+        return formatter.date(from: self)
     }
 }
 
