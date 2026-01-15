@@ -53,7 +53,7 @@ class UserProfileViewModel: ObservableObject {
     }
     
     var userBio: String {
-        return user?.bio ?? "这个人很懒，什么都没写"
+        return user?.bio ?? NSLocalizedString("This person is lazy and wrote nothing", comment: "Default bio text")
     }
     
     var userLocation: String? {
@@ -89,7 +89,7 @@ class UserProfileViewModel: ObservableObject {
     
     var joinedDate: String {
         guard let user = user else { return "" }
-        return "加入于 " + formatDate(user.createdAt)
+        return NSLocalizedString("Joined on", comment: "Joined date prefix") + " " + formatDate(user.createdAt)
     }
     
     var avatarURL: String? {

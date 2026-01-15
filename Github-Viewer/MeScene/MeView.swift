@@ -41,7 +41,7 @@ struct MeView: View {
             case .notLoggedIn:
                 LoginView(viewModel: viewModel)
             case .loggingIn:
-                LoadingView(message: "登录中...")
+                LoadingView(message: NSLocalizedString("Logging in...", comment: "Login loading message"))
             case .loggedIn(let userProfile):
                 ProfileView(userProfile: userProfile, viewModel: viewModel, navigationDelegate: navigationDelegate)
             case .waitingForSaveChoice(let userProfile):
@@ -52,12 +52,12 @@ struct MeView: View {
         }
         .alert(isPresented: $viewModel.showTokenSaveAlert) {
             Alert(
-                title: Text("保存登录信息"),
-                message: Text("是否保存您的登录信息？保存后可使用\(viewModel.biometryName)快速登录。"),
-                primaryButton: .default(Text("保存")) {
+                title: Text(NSLocalizedString("Save login information", comment: "Save login dialog title")),
+                message: Text(String(format: NSLocalizedString("Save login info question %@", comment: "Save login dialog message"), viewModel.biometryName)),
+                primaryButton: .default(Text(NSLocalizedString("Save", comment: "Save button"))) {
                     viewModel.saveTokenAndLogin(shouldSave: true)
                 },
-                secondaryButton: .cancel(Text("不保存")) {
+                secondaryButton: .cancel(Text(NSLocalizedString("Don't save", comment: "Don't save button"))) {
                     viewModel.saveTokenAndLogin(shouldSave: false)
                 }
             )
@@ -81,11 +81,11 @@ struct LoginView: View {
                         .font(.system(size: 80))
                         .foregroundColor(.blue)
                     
-                    Text("登录 GitHub")
+                    Text(NSLocalizedString("Login to GitHub", comment: "Login title"))
                         .font(.title2)
                         .fontWeight(.semibold)
                     
-                    Text("使用 Personal Access Token 登录以获取真实的 GitHub 数据")
+                    Text(NSLocalizedString("Use Personal Access Token to login and get real GitHub data", comment: "Login description"))
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -103,14 +103,14 @@ struct LoginView: View {
                             
                             Spacer()
                             
-                            Button("如何获取?") {
+                            Button(NSLocalizedString("How to Get?", comment: "How to get token button")) {
                                 showTokenGuide = true
                             }
                             .font(.caption)
                             .foregroundColor(.blue)
                         }
                         
-                        SecureField("请输入您的 GitHub Personal Access Token", text: $viewModel.accessToken)
+                        SecureField(NSLocalizedString("Please enter your GitHub Personal Access Token", comment: "Token field placeholder"), text: $viewModel.accessToken)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .autocapitalization(.none)
                             .disableAutocorrection(true)
@@ -127,7 +127,7 @@ struct LoginView: View {
                                     .scaleEffect(0.8)
                             }
                             
-                            Text("登录")
+                            Text(NSLocalizedString("Login", comment: "Login button"))
                                 .fontWeight(.semibold)
                         }
                         .frame(maxWidth: .infinity)
@@ -160,15 +160,15 @@ struct LoginView: View {
                 
                 // Info Section
                 VStack(spacing: 12) {
-                    Text("安全提示")
+                    Text(NSLocalizedString("Security Tips", comment: "Security tips title"))
                         .font(.subheadline)
                         .fontWeight(.semibold)
                     
                     VStack(alignment: .leading, spacing: 8) {
-                        InfoRow(icon: "shield.fill", text: "Token 将安全存储在设备钥匙串中")
-                        InfoRow(icon: "faceid", text: "只有获得生物识别权限才会保存Token")
-                        InfoRow(icon: "checkmark.seal", text: "推荐权限：read:user, user:email, repo")
-                        InfoRow(icon: "exclamationmark.triangle", text: "请勿与他人分享您的 Token")
+                        InfoRow(icon: "shield.fill", text: NSLocalizedString("Token will be securely stored in device keychain", comment: "Security tip"))
+                        InfoRow(icon: "faceid", text: NSLocalizedString("biometric authentication required to save Token", comment: "Security tip"))
+                        InfoRow(icon: "checkmark.seal", text: NSLocalizedString("Recommended permissions: read:user, user:email, repo", comment: "Security tip"))
+                        InfoRow(icon: "exclamationmark.triangle", text: NSLocalizedString("Do not share your Token with others", comment: "Security warning"))
                     }
                 }
                 .padding()
@@ -205,23 +205,23 @@ struct ProfileView: View {
                 // Info Sections
                 VStack(spacing: 16) {
                     if let bio = userProfile.bio, !bio.isEmpty {
-                        ProfileInfoSection(title: "简介", content: bio, icon: "text.quote")
+                        ProfileInfoSection(title: NSLocalizedString("Bio", comment: "Bio section"), content: bio, icon: "text.quote")
                     }
                     
                     if let location = userProfile.location, !location.isEmpty {
-                        ProfileInfoSection(title: "位置", content: location, icon: "location")
+                        ProfileInfoSection(title: NSLocalizedString("Location", comment: "Location section"), content: location, icon: "location")
                     }
                     
                     if let company = userProfile.company, !company.isEmpty {
-                        ProfileInfoSection(title: "公司", content: company, icon: "building.2")
+                        ProfileInfoSection(title: NSLocalizedString("Company", comment: "Company section"), content: company, icon: "building.2")
                     }
                     
                     if let blog = userProfile.blog, !blog.isEmpty {
-                        ProfileInfoSection(title: "博客", content: blog, icon: "link")
+                        ProfileInfoSection(title: NSLocalizedString("Blog", comment: "Blog section"), content: blog, icon: "link")
                     }
                     
                     if let email = userProfile.email, !email.isEmpty {
-                        ProfileInfoSection(title: "邮箱", content: email, icon: "envelope")
+                        ProfileInfoSection(title: NSLocalizedString("Email", comment: "Email section"), content: email, icon: "envelope")
                     }
                 }
                 
@@ -268,7 +268,7 @@ struct ProfileHeaderView: View {
             }
             
             // Join Date
-            Text("加入于 \(formatDate(userProfile.createdAt))")
+            Text(String(format: NSLocalizedString("Joined on", comment: "Joined date prefix") + " %@", formatDate(userProfile.createdAt)))
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
@@ -297,22 +297,22 @@ struct ProfileStatsView: View {
     
     var body: some View {
         HStack(spacing: 0) {
-            StatItemView(title: "仓库", value: "\(userProfile.publicRepos)")
+            StatItemView(title: NSLocalizedString("Repositories", comment: "Repositories count"), value: "\(userProfile.publicRepos)")
             
             Divider()
                 .frame(height: 40)
             
-            StatItemView(title: "关注者", value: "\(userProfile.followers)")
+            StatItemView(title: NSLocalizedString("Followers", comment: "Followers count"), value: "\(userProfile.followers)")
             
             Divider()
                 .frame(height: 40)
             
-            StatItemView(title: "关注", value: "\(userProfile.following)")
+            StatItemView(title: NSLocalizedString("Following", comment: "Following count"), value: "\(userProfile.following)")
             
             Divider()
                 .frame(height: 40)
             
-            StatItemView(title: "Gists", value: "\(userProfile.publicGists)")
+            StatItemView(title: NSLocalizedString("Gists", comment: "Gists count"), value: "\(userProfile.publicGists)")
         }
         .padding()
         .background(Color(.systemBackground))
@@ -404,7 +404,7 @@ struct ErrorView: View {
                 .foregroundColor(.orange)
             
             VStack(spacing: 8) {
-                Text("出现错误")
+                Text(NSLocalizedString("An Error Occurred", comment: "Error message title"))
                     .font(.title3)
                     .fontWeight(.semibold)
                 
@@ -414,7 +414,7 @@ struct ErrorView: View {
                     .multilineTextAlignment(.center)
             }
             
-            Button("重试") {
+            Button(NSLocalizedString("Retry", comment: "Retry button")) {
                 viewModel.clearError()
             }
             .padding(.horizontal, 20)
@@ -466,12 +466,12 @@ struct TokenGuideView: View {
                                 .font(.title2)
                                 .foregroundColor(.blue)
                             
-                            Text("获取 Personal Access Token")
+                            Text(NSLocalizedString("Get Personal Access Token", comment: "Token guide title"))
                                 .font(.title2)
                                 .fontWeight(.bold)
                         }
                         
-                        Text("按照以下步骤在 GitHub 上生成您的个人访问令牌")
+                        Text(NSLocalizedString("Follow the steps below to generate your personal access token on GitHub", comment: "Token guide description"))
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
@@ -480,45 +480,45 @@ struct TokenGuideView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         GuideStepView(
                             step: "1",
-                            title: "访问 GitHub 设置",
-                            description: "登录 GitHub.com，点击右上角头像 → Settings"
+                            title: NSLocalizedString("Access GitHub Settings", comment: "Token guide step title"),
+                            description: NSLocalizedString("Access GitHub Settings Description", comment: "Token guide step description")
                         )
                         
                         GuideStepView(
                             step: "2",
-                            title: "进入开发者设置",
-                            description: "在左侧菜单中找到 \"Developer settings\""
+                            title: NSLocalizedString("Enter Developer Settings", comment: "Token guide step title"),
+                            description: NSLocalizedString("Enter Developer Settings Description", comment: "Token guide step description")
                         )
                         
                         GuideStepView(
                             step: "3",
-                            title: "创建 Token",
-                            description: "点击 \"Personal access tokens\" → \"Tokens (classic)\" → \"Generate new token\""
+                            title: NSLocalizedString("Create Token", comment: "Token guide step title"),
+                            description: NSLocalizedString("Create Token Description", comment: "Token guide step description")
                         )
                         
                         GuideStepView(
                             step: "4",
-                            title: "配置权限",
-                            description: "为 Token 命名，选择过期时间，勾选以下权限："
+                            title: NSLocalizedString("Configure Permissions", comment: "Token guide step title"),
+                            description: NSLocalizedString("Configure Permissions Description", comment: "Token guide step description")
                         )
                         
                         VStack(alignment: .leading, spacing: 8) {
-                            PermissionRow(permission: "read:user", description: "读取用户基本信息")
-                            PermissionRow(permission: "user:email", description: "读取用户邮箱地址")
-                            PermissionRow(permission: "repo", description: "访问仓库信息（可选）")
+                            PermissionRow(permission: "read:user", description: NSLocalizedString("Permission read:user description", comment: "Permission description"))
+                            PermissionRow(permission: "user:email", description: NSLocalizedString("Permission user:email description", comment: "Permission description"))
+                            PermissionRow(permission: "repo", description: NSLocalizedString("Permission repo description", comment: "Permission description"))
                         }
                         .padding(.leading, 40)
                         
                         GuideStepView(
                             step: "5",
-                            title: "生成并复制",
-                            description: "点击 \"Generate token\"，立即复制生成的 Token（只显示一次）"
+                            title: NSLocalizedString("Generate and Copy", comment: "Token guide step title"),
+                            description: NSLocalizedString("Generate and Copy Description", comment: "Token guide step description")
                         )
                         
                         GuideStepView(
                             step: "6",
-                            title: "在应用中使用",
-                            description: "返回应用，将复制的 Token 粘贴到登录界面"
+                            title: NSLocalizedString("Use in App", comment: "Token guide step title"),
+                            description: NSLocalizedString("Use in App Description", comment: "Token guide step description")
                         )
                     }
                     
@@ -527,16 +527,16 @@ struct TokenGuideView: View {
                         HStack {
                             Image(systemName: "exclamationmark.triangle.fill")
                                 .foregroundColor(.orange)
-                            Text("安全提醒")
+                            Text(NSLocalizedString("Security Reminder", comment: "Security reminder title"))
                                 .font(.headline)
                                 .fontWeight(.semibold)
                         }
                         
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("• Token 具有与您的 GitHub 账户相同的权限")
-                            Text("• 请勿与他人分享您的 Token")
-                            Text("• 如果 Token 泄露，请立即在 GitHub 上删除")
-                            Text("• 建议设置合理的过期时间")
+                            Text(NSLocalizedString("Token has same permissions as your GitHub account", comment: "Security warning"))
+                            Text(NSLocalizedString("Do not share your Token with others", comment: "Security warning"))
+                            Text(NSLocalizedString("If Token is leaked, delete it immediately on GitHub", comment: "Security warning"))
+                            Text(NSLocalizedString("Set reasonable expiration time", comment: "Security warning"))
                         }
                         .font(.subheadline)
                         .foregroundColor(.secondary)
@@ -549,9 +549,9 @@ struct TokenGuideView: View {
                 }
                 .padding()
             }
-            .navigationTitle("Token 获取指南")
+            .navigationTitle(NSLocalizedString("Get Personal Access Token", comment: "Token guide title"))
             .navigationBarTitleDisplayMode(.inline)
-            .navigationBarItems(trailing: Button("完成") {
+            .navigationBarItems(trailing: Button(NSLocalizedString("Done", comment: "Done button")) {
                 presentationMode.wrappedValue.dismiss()
             })
         }
@@ -633,7 +633,7 @@ struct UserRepositoriesSection: View {
         VStack(alignment: .leading, spacing: 16) {
             // Section Header
             HStack {
-                Text("我的项目")
+                Text(NSLocalizedString("My Repositories", comment: "My repositories section title"))
                     .font(.title2)
                     .fontWeight(.bold)
                 
@@ -653,11 +653,11 @@ struct UserRepositoriesSection: View {
                         .font(.system(size: 40))
                         .foregroundColor(.secondary)
                     
-                    Text("暂无项目")
+                    Text(NSLocalizedString("No repositories yet", comment: "Empty repositories message"))
                         .font(.headline)
                         .foregroundColor(.secondary)
                     
-                    Text("您还没有创建任何项目")
+                    Text(NSLocalizedString("You have not created any repositories yet", comment: "Empty repositories description"))
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -679,7 +679,7 @@ struct UserRepositoriesSection: View {
                             // TODO: Navigate to full repository list
                         }) {
                             HStack {
-                                Text("查看全部 \(viewModel.userRepositories.count) 个项目")
+                                Text(String(format: NSLocalizedString("View all %lld repositories", comment: "View all repositories button"), viewModel.userRepositories.count))
                                 Spacer()
                                 Image(systemName: "chevron.right")
                             }
@@ -715,7 +715,7 @@ struct UserRepositoryCard: View {
                 Spacer()
                 
                 // Visibility Badge
-                Text(repository.isPrivate ? "私有" : "公开")
+                Text(repository.isPrivate ? NSLocalizedString("Private", comment: "Private repository badge") : NSLocalizedString("Public", comment: "Public repository badge"))
                     .font(.caption)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
@@ -763,7 +763,7 @@ struct UserRepositoryCard: View {
                 
                 Spacer()
                 
-                Text(repository.updatedAt.toDate()?.timeAgoDisplay() ?? "未知时间")
+                Text(repository.updatedAt.toDate()?.timeAgoDisplay() ?? NSLocalizedString("Unknown time", comment: "Unknown time display"))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }

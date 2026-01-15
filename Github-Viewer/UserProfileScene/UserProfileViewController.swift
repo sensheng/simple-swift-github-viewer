@@ -177,9 +177,9 @@ class UserProfileViewController: UIViewController {
     }
     
     private func setupStatsStackView() {
-        let followersStat = createStatView(title: "关注者", value: viewModel.followersCount)
-        let followingStat = createStatView(title: "关注中", value: viewModel.followingCount)
-        let reposStat = createStatView(title: "仓库", value: viewModel.publicReposCount)
+        let followersStat = createStatView(title: NSLocalizedString("Followers", comment: "Followers count"), value: viewModel.followersCount)
+        let followingStat = createStatView(title: NSLocalizedString("Following", comment: "Following count"), value: viewModel.followingCount)
+        let reposStat = createStatView(title: NSLocalizedString("Repositories", comment: "Repositories count"), value: viewModel.publicReposCount)
         
         statsStackView.addArrangedSubview(followersStat)
         statsStackView.addArrangedSubview(followingStat)
@@ -434,9 +434,9 @@ class UserProfileViewController: UIViewController {
         statsStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
         // Add updated stats
-        let followersStat = createStatView(title: "关注者", value: viewModel.followersCount)
-        let followingStat = createStatView(title: "关注中", value: viewModel.followingCount)
-        let reposStat = createStatView(title: "仓库", value: viewModel.publicReposCount)
+        let followersStat = createStatView(title: NSLocalizedString("Followers", comment: "Followers count"), value: viewModel.followersCount)
+        let followingStat = createStatView(title: NSLocalizedString("Following", comment: "Following count"), value: viewModel.followingCount)
+        let reposStat = createStatView(title: NSLocalizedString("Repositories", comment: "Repositories count"), value: viewModel.publicReposCount)
         
         statsStackView.addArrangedSubview(followersStat)
         statsStackView.addArrangedSubview(followingStat)
@@ -459,7 +459,7 @@ extension UserProfileViewController: UserProfileViewModelDelegate {
         refreshControl.endRefreshing()
         
         if viewModel.isEmpty {
-            let message = "该用户暂无公开仓库"
+            let message = NSLocalizedString("User has no public repositories", comment: "Empty state message")
             let image = UIImage(systemName: "folder")
             tableView.setEmptyState(message: message, image: image)
         } else {
@@ -473,16 +473,16 @@ extension UserProfileViewController: UserProfileViewModelDelegate {
         
         // Show error alert
         let alert = UIAlertController(
-            title: "加载失败",
+            title: NSLocalizedString("Load failed", comment: "Error alert title"),
             message: error.localizedDescription,
             preferredStyle: .alert
         )
         
-        alert.addAction(UIAlertAction(title: "重试", style: .default) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Retry", comment: "Retry button"), style: .default) { [weak self] _ in
             self?.viewModel.loadUserProfile()
         })
         
-        alert.addAction(UIAlertAction(title: "取消", style: .cancel))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: "Cancel button"), style: .cancel))
         
         present(alert, animated: true)
         
@@ -554,7 +554,7 @@ extension UserProfileViewController: UITableViewDataSource, UITableViewDelegate 
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return viewModel.numberOfRepositories > 0 ? "仓库列表" : nil
+        return viewModel.numberOfRepositories > 0 ? NSLocalizedString("Repository List", comment: "Repository list section header") : nil
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {

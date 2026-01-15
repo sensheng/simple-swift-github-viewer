@@ -73,7 +73,7 @@ class RepositoryDetailViewController: UIViewController {
     }()
     
     private let segmentedControl: UISegmentedControl = {
-        let items = ["README", "文件列表", "贡献者"]
+        let items = [NSLocalizedString("README", comment: "README tab"), NSLocalizedString("File List", comment: "File list tab"), NSLocalizedString("Contributors", comment: "Contributors tab")]
         let control = UISegmentedControl(items: items)
         control.selectedSegmentIndex = 0
         control.translatesAutoresizingMaskIntoConstraints = false
@@ -200,9 +200,9 @@ class RepositoryDetailViewController: UIViewController {
     }
     
     private func setupStatsStackView() {
-        let starsStat = createStatView(icon: "star.fill", color: .systemYellow, title: "Stars", value: viewModel.starsCount)
-        let forksStat = createStatView(icon: "tuningfork", color: .systemBlue, title: "Forks", value: viewModel.forksCount)
-        let watchersStat = createStatView(icon: "eye.fill", color: .systemGreen, title: "Watchers", value: viewModel.watchersCount)
+        let starsStat = createStatView(icon: "star.fill", color: .systemYellow, title: NSLocalizedString("Stars", comment: "Stars count"), value: viewModel.starsCount)
+        let forksStat = createStatView(icon: "tuningfork", color: .systemBlue, title: NSLocalizedString("Forks", comment: "Forks count"), value: viewModel.forksCount)
+        let watchersStat = createStatView(icon: "eye.fill", color: .systemGreen, title: NSLocalizedString("Watchers", comment: "Watchers count"), value: viewModel.watchersCount)
         
         statsStackView.addArrangedSubview(starsStat)
         statsStackView.addArrangedSubview(forksStat)
@@ -427,9 +427,9 @@ class RepositoryDetailViewController: UIViewController {
         statsStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
         // Add updated stats
-        let starsStat = createStatView(icon: "star.fill", color: .systemYellow, title: "Stars", value: viewModel.starsCount)
-        let forksStat = createStatView(icon: "tuningfork", color: .systemBlue, title: "Forks", value: viewModel.forksCount)
-        let watchersStat = createStatView(icon: "eye.fill", color: .systemGreen, title: "Watchers", value: viewModel.watchersCount)
+        let starsStat = createStatView(icon: "star.fill", color: .systemYellow, title: NSLocalizedString("Stars", comment: "Stars count"), value: viewModel.starsCount)
+        let forksStat = createStatView(icon: "tuningfork", color: .systemBlue, title: NSLocalizedString("Forks", comment: "Forks count"), value: viewModel.forksCount)
+        let watchersStat = createStatView(icon: "eye.fill", color: .systemGreen, title: NSLocalizedString("Watchers", comment: "Watchers count"), value: viewModel.watchersCount)
         
         statsStackView.addArrangedSubview(starsStat)
         statsStackView.addArrangedSubview(forksStat)
@@ -438,7 +438,9 @@ class RepositoryDetailViewController: UIViewController {
     
     private func loadReadmeContent() {
         guard let readmeContent = viewModel.readmeContent else {
-            readmeMarkdownView.loadMarkdown("# 无README文件\n\n该项目暂无README文件。")
+            let noReadmeTitle = NSLocalizedString("No README file", comment: "No README title")
+            let noReadmeMessage = NSLocalizedString("This project has no README file.", comment: "No README message")
+            readmeMarkdownView.loadMarkdown("# \(noReadmeTitle)\n\n\(noReadmeMessage)")
             return
         }
         
@@ -463,16 +465,16 @@ extension RepositoryDetailViewController: RepositoryDetailViewModelDelegate {
         loadingIndicator.stopAnimating()
         
         let alert = UIAlertController(
-            title: "加载失败",
+            title: NSLocalizedString("Load failed", comment: "Error alert title"),
             message: error.localizedDescription,
             preferredStyle: .alert
         )
         
-        alert.addAction(UIAlertAction(title: "重试", style: .default) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Retry", comment: "Retry button"), style: .default) { [weak self] _ in
             self?.viewModel.loadRepositoryDetails()
         })
         
-        alert.addAction(UIAlertAction(title: "取消", style: .cancel))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: "Cancel button"), style: .cancel))
         
         present(alert, animated: true)
     }
@@ -518,7 +520,7 @@ extension RepositoryDetailViewController: UITableViewDataSource, UITableViewDele
             let contributor = viewModel.contributors[indexPath.row]
             
             cell.textLabel?.text = contributor.login
-            cell.detailTextLabel?.text = "\(contributor.contributions) 贡献"
+            cell.detailTextLabel?.text = String(format: NSLocalizedString("Contributions %d", comment: "Contributions count"), contributor.contributions)
             cell.backgroundColor = UIColor.systemBackground
             
             return cell
@@ -542,9 +544,9 @@ extension RepositoryDetailViewController: UITableViewDataSource, UITableViewDele
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         if tableView == filesTableView {
-            return "文件列表"
+            return NSLocalizedString("File List", comment: "File list section header")
         } else if tableView == contributorsTableView {
-            return "贡献者"
+            return NSLocalizedString("Contributors", comment: "Contributors section header")
         }
         return nil
     }

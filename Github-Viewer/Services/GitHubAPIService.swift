@@ -505,19 +505,19 @@ enum APIError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidURL:
-            return "无效的URL"
+            return NSLocalizedString("Invalid URL", comment: "API error message")
         case .invalidResponse:
-            return "无效的响应"
+            return NSLocalizedString("Invalid response", comment: "API error message")
         case .unauthorized:
-            return "Token无效或已过期，请重新登录"
+            return NSLocalizedString("Token invalid or expired", comment: "Error message")
         case .forbidden:
-            return "访问被拒绝，请检查Token权限"
+            return NSLocalizedString("Access denied, please check Token permissions", comment: "API error message")
         case .serverError(let message):
-            return "服务器错误: \(message)"
+            return String(format: NSLocalizedString("Server error: %@", comment: "API error message with parameter"), message)
         case .decodingError:
-            return "数据解析错误"
+            return NSLocalizedString("Data parsing error", comment: "API error message")
         case .networkError(let error):
-            return "网络错误: \(error.localizedDescription)"
+            return String(format: NSLocalizedString("Network error: %@", comment: "Error message with parameter"), error.localizedDescription)
         }
     }
 }

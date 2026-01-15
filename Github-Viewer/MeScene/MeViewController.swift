@@ -47,7 +47,7 @@ class MeViewController: UIViewController {
     // MARK: - Setup
     
     private func setupSwiftUIView() {
-        title = "我的"
+        title = NSLocalizedString("Me", comment: "Me tab title")
         
         viewModel = MeViewModel()
         meView = MeView(viewModel: viewModel)
@@ -116,13 +116,13 @@ class MeViewController: UIViewController {
     
     @objc private func logoutButtonTapped() {
         let alert = UIAlertController(
-            title: "退出登录",
-            message: "确定要退出登录吗？",
+            title: NSLocalizedString("Logout Confirmation", comment: "Logout alert title"),
+            message: NSLocalizedString("Logout Confirmation Message", comment: "Logout alert message"),
             preferredStyle: .alert
         )
         
-        alert.addAction(UIAlertAction(title: "取消", style: .cancel))
-        alert.addAction(UIAlertAction(title: "退出", style: .destructive) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: "Cancel button"), style: .cancel))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Logout", comment: "Logout button"), style: .destructive) { [weak self] _ in
             self?.viewModel.logout()
             self?.navigationItem.rightBarButtonItems = nil
         })
@@ -150,7 +150,7 @@ class MeViewController: UIViewController {
     private func setupNavigationBar() {
         // Configure tab bar item
         tabBarItem = UITabBarItem(
-            title: "我的",
+            title: NSLocalizedString("Me", comment: "Me tab title"),
             image: UIImage(systemName: "person"),
             selectedImage: UIImage(systemName: "person.fill")
         )

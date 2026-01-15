@@ -32,7 +32,7 @@ class MainViewController: UITableViewController {
     // MARK: - Setup Methods
     
     private func setupUI() {
-        title = "GitHub"
+        title = NSLocalizedString("GitHub", comment: "Main screen title")
         
         // Configure table view
         tableView.backgroundColor = UIColor.systemGroupedBackground
@@ -59,7 +59,7 @@ class MainViewController: UITableViewController {
     private func setupSearchController() {
         searchController.searchResultsUpdater = self
         searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchBar.placeholder = "搜索 GitHub 项目"
+        searchController.searchBar.placeholder = NSLocalizedString("Search GitHub repositories", comment: "Search bar placeholder")
         searchController.searchBar.delegate = self
         
         // Configure search bar appearance
@@ -167,16 +167,16 @@ extension MainViewController: RepositoryViewModelDelegate {
         
         // Show error alert
         let alert = UIAlertController(
-            title: "加载失败",
+            title: NSLocalizedString("Load failed", comment: "Error alert title"),
             message: error.localizedDescription,
             preferredStyle: .alert
         )
         
-        alert.addAction(UIAlertAction(title: "重试", style: .default) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Retry", comment: "Retry button"), style: .default) { [weak self] _ in
             self?.handleRefresh()
         })
         
-        alert.addAction(UIAlertAction(title: "取消", style: .cancel))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: "Cancel button"), style: .cancel))
         
         present(alert, animated: true)
         

@@ -1,0 +1,1291 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "@%@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "@%@"
+          }
+        }
+      }
+    },
+    "%lld" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        }
+      }
+    },
+    "Access GitHub Settings" : {
+      "comment" : "Token guide step title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "访问 GitHub 设置"
+          }
+        }
+      }
+    },
+    "Access GitHub Settings Description" : {
+      "comment" : "Token guide step description",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登录 GitHub.com，点击右上角头像 → Settings"
+          }
+        }
+      }
+    },
+    "An Error Occurred" : {
+      "comment" : "Error message title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出现错误"
+          }
+        }
+      }
+    },
+    "Bio" : {
+      "comment" : "Bio section",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "简介"
+          }
+        }
+      }
+    },
+    "Biometric Authentication" : {
+      "comment" : "Generic biometry name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生物识别"
+          }
+        }
+      }
+    },
+    "biometric authentication required to save Token" : {
+      "comment" : "Security tip",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "• 只有获得生物识别权限才会保存Token"
+          }
+        }
+      }
+    },
+    "Stars" : {
+      "comment" : "Stars count",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stars"
+          }
+        }
+      }
+    },
+    "Forks" : {
+      "comment" : "Forks count",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forks"
+          }
+        }
+      }
+    },
+    "Watchers" : {
+      "comment" : "Watchers count",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watchers"
+          }
+        }
+      }
+    },
+    "Search: %@" : {
+      "comment" : "Search state with query",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索: %@"
+          }
+        }
+      }
+    },
+    "Searching..." : {
+      "comment" : "Searching state",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索中..."
+          }
+        }
+      }
+    },
+    "Trending Repositories" : {
+      "comment" : "Trending repositories title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "热门项目"
+          }
+        }
+      }
+    },
+    "No repositories found" : {
+      "comment" : "Empty search results message",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未找到相关项目"
+          }
+        }
+      }
+    },
+    "No data available" : {
+      "comment" : "Empty state message",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂无数据"
+          }
+        }
+      }
+    },
+    "Invalid URL" : {
+      "comment" : "API error message",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无效的URL"
+          }
+        }
+      }
+    },
+    "Invalid response" : {
+      "comment" : "API error message",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无效的响应"
+          }
+        }
+      }
+    },
+    "Access denied, please check Token permissions" : {
+      "comment" : "API error message",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "访问被拒绝，请检查Token权限"
+          }
+        }
+      }
+    },
+    "Server error: %@" : {
+      "comment" : "API error message with parameter",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "服务器错误: %@"
+          }
+        }
+      }
+    },
+    "Data parsing error" : {
+      "comment" : "API error message",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "数据解析错误"
+          }
+        }
+      }
+    },
+    "Token permissions insufficient, please check permission settings" : {
+      "comment" : "Token permission error",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token 权限不足，请检查权限设置"
+          }
+        }
+      }
+    },
+    "Token permissions insufficient" : {
+      "comment" : "Token permission error",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token 权限不足"
+          }
+        }
+      }
+    },
+    "No saved login information found, please enter Token to login again" : {
+      "comment" : "No saved login error",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未找到保存的登录信息，请重新输入Token登录"
+          }
+        }
+      }
+    },
+    "Use biometric authentication to login to GitHub Viewer" : {
+      "comment" : "Biometry login reason",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用生物识别登录 GitHub Viewer"
+          }
+        }
+      }
+    },
+    "Allow biometric authentication for quick login next time" : {
+      "comment" : "Biometry setup reason",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "允许使用生物识别功能以便下次快速登录"
+          }
+        }
+      }
+    },
+    "Repository not found" : {
+      "comment" : "Repository not found error",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未找到仓库"
+          }
+        }
+      }
+    },
+    "Biometric setup failed, Token will be saved" : {
+      "comment" : "Biometry failed message",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生物识别设置失败，Token仍会保存"
+          }
+        }
+      }
+    },
+    "Biometry authentication failed" : {
+      "comment" : "Biometry authentication failed",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生物识别授权失败"
+          }
+        }
+      }
+    },
+    "Biometry not available" : {
+      "comment" : "Error message",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生物识别不可用"
+          }
+        }
+      }
+    },
+    "Biometry not enrolled" : {
+      "comment" : "Error message",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未设置生物识别"
+          }
+        }
+      }
+    },
+    "Biometry not set up, please set up in system settings to use quick login" : {
+      "comment" : "Biometry not enrolled message",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未设置生物识别，请在系统设置中设置后即可使用快速登录"
+          }
+        }
+      }
+    },
+    "Blog" : {
+      "comment" : "Blog section",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "博客"
+          }
+        }
+      }
+    },
+    "Cancel" : {
+      "comment" : "Cancel button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消"
+          }
+        }
+      }
+    },
+    "Company" : {
+      "comment" : "Company section",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公司"
+          }
+        }
+      }
+    },
+    "Configure Permissions" : {
+      "comment" : "Token guide step title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "配置权限"
+          }
+        }
+      }
+    },
+    "Configure Permissions Description" : {
+      "comment" : "Token guide step description",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "为 Token 命名，选择过期时间，勾选以下权限："
+          }
+        }
+      }
+    },
+    "Contributions %d" : {
+      "comment" : "Contributions count",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d 贡献"
+          }
+        }
+      }
+    },
+    "Contributors" : {
+      "comment" : "Contributors section header\nContributors tab",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "贡献者"
+          }
+        }
+      }
+    },
+    "Create Token" : {
+      "comment" : "Token guide step title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "创建 Token"
+          }
+        }
+      }
+    },
+    "Create Token Description" : {
+      "comment" : "Token guide step description",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点击 \"Personal access tokens\" → \"Tokens (classic)\" → \"Generate new token\""
+          }
+        }
+      }
+    },
+    "Device does not support biometry, but Token will be saved" : {
+      "comment" : "Biometry not available message",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设备不支持生物识别，但Token仍会保存"
+          }
+        }
+      }
+    },
+    "Do not share your Token with others" : {
+      "comment" : "Security warning",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "• 请勿与他人分享您的 Token"
+          }
+        }
+      }
+    },
+    "Don't save" : {
+      "comment" : "Don't save button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不保存"
+          }
+        }
+      }
+    },
+    "Done" : {
+      "comment" : "Done button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完成"
+          }
+        }
+      }
+    },
+    "Email" : {
+      "comment" : "Email section",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "邮箱"
+          }
+        }
+      }
+    },
+    "Enter Developer Settings" : {
+      "comment" : "Token guide step title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "进入开发者设置"
+          }
+        }
+      }
+    },
+    "Enter Developer Settings Description" : {
+      "comment" : "Token guide step description",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在左侧菜单中找到 \"Developer settings\""
+          }
+        }
+      }
+    },
+    "Face ID" : {
+      "comment" : "Face ID name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Face ID"
+          }
+        }
+      }
+    },
+    "File List" : {
+      "comment" : "File list section header\nFile list tab",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文件列表"
+          }
+        }
+      }
+    },
+    "Follow the steps below to generate your personal access token on GitHub" : {
+      "comment" : "Token guide description",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按照以下步骤在 GitHub 上生成您的个人访问令牌"
+          }
+        }
+      }
+    },
+    "Followers" : {
+      "comment" : "Followers count",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关注者"
+          }
+        }
+      }
+    },
+    "Following" : {
+      "comment" : "Following count",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关注"
+          }
+        }
+      }
+    },
+    "Generate and Copy" : {
+      "comment" : "Token guide step title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生成并复制"
+          }
+        }
+      }
+    },
+    "Generate and Copy Description" : {
+      "comment" : "Token guide step description",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点击 \"Generate token\"，立即复制生成的 Token（只显示一次）"
+          }
+        }
+      }
+    },
+    "Get Personal Access Token" : {
+      "comment" : "Token guide title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "获取 Personal Access Token"
+          }
+        }
+      }
+    },
+    "Gists" : {
+      "comment" : "Gists count",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gists"
+          }
+        }
+      }
+    },
+    "GitHub" : {
+      "comment" : "Main screen title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub"
+          }
+        }
+      }
+    },
+    "How to Get?" : {
+      "comment" : "How to get token button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如何获取?"
+          }
+        }
+      }
+    },
+    "If Token is leaked, delete it immediately on GitHub" : {
+      "comment" : "Security warning",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "• 如果 Token 泄露，请立即在 GitHub 上删除"
+          }
+        }
+      }
+    },
+    "Joined on" : {
+      "comment" : "Joined date prefix",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "加入于"
+          }
+        }
+      }
+    },
+    "Keychain error: %d" : {
+      "comment" : "Error message with parameter",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "钥匙串错误: %d"
+          }
+        }
+      }
+    },
+    "Load failed" : {
+      "comment" : "Error alert title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "加载失败"
+          }
+        }
+      }
+    },
+    "Loading..." : {
+      "comment" : "Loading text",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "加载中..."
+          }
+        }
+      }
+    },
+    "Location" : {
+      "comment" : "Location section",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "位置"
+          }
+        }
+      }
+    },
+    "Logging in..." : {
+      "comment" : "Login loading message",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登录中..."
+          }
+        }
+      }
+    },
+    "Login" : {
+      "comment" : "Login button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登录"
+          }
+        }
+      }
+    },
+    "Login to GitHub" : {
+      "comment" : "Login title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登录 GitHub"
+          }
+        }
+      }
+    },
+    "Login with Biometry" : {
+      "comment" : "Generic biometry login button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用生物识别登录"
+          }
+        }
+      }
+    },
+    "Login with Face ID" : {
+      "comment" : "Face ID login button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用 Face ID 登录"
+          }
+        }
+      }
+    },
+    "Login with Touch ID" : {
+      "comment" : "Touch ID login button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用 Touch ID 登录"
+          }
+        }
+      }
+    },
+    "Logout" : {
+      "comment" : "Logout button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "退出"
+          }
+        }
+      }
+    },
+    "Logout Confirmation" : {
+      "comment" : "Logout alert title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "退出登录"
+          }
+        }
+      }
+    },
+    "Logout Confirmation Message" : {
+      "comment" : "Logout alert message",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "确定要退出登录吗？"
+          }
+        }
+      }
+    },
+    "Me" : {
+      "comment" : "Me tab title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我的"
+          }
+        }
+      }
+    },
+    "My Repositories" : {
+      "comment" : "My repositories section title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我的项目"
+          }
+        }
+      }
+    },
+    "Network error: %@" : {
+      "comment" : "Error message with parameter",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "网络错误: %@"
+          }
+        }
+      }
+    },
+    "No description" : {
+      "comment" : "No description text",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无描述"
+          }
+        }
+      }
+    },
+    "No README file" : {
+      "comment" : "No README title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无README文件"
+          }
+        }
+      }
+    },
+    "No repositories yet" : {
+      "comment" : "Empty repositories message",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂无项目"
+          }
+        }
+      }
+    },
+    "Permission read:user description" : {
+      "comment" : "Permission description",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "读取用户基本信息"
+          }
+        }
+      }
+    },
+    "Permission repo description" : {
+      "comment" : "Permission description",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "访问仓库信息（可选）"
+          }
+        }
+      }
+    },
+    "Permission user:email description" : {
+      "comment" : "Permission description",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "读取用户邮箱地址"
+          }
+        }
+      }
+    },
+    "Personal Access Token" : {
+      "comment" : "Token field label",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personal Access Token"
+          }
+        }
+      }
+    },
+    "Please enter valid Personal Access Token" : {
+      "comment" : "Token validation error",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请输入有效的 Personal Access Token"
+          }
+        }
+      }
+    },
+    "Please enter your GitHub Personal Access Token" : {
+      "comment" : "Token field placeholder",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请输入您的 GitHub Personal Access Token"
+          }
+        }
+      }
+    },
+    "Private" : {
+      "comment" : "Private repository badge",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "私有"
+          }
+        }
+      }
+    },
+    "Public" : {
+      "comment" : "Public repository badge",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公开"
+          }
+        }
+      }
+    },
+    "README" : {
+      "comment" : "README tab",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "README"
+          }
+        }
+      }
+    },
+    "Recommended permissions: read:user, user:email, repo" : {
+      "comment" : "Security tip",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "• 推荐权限：read:user, user:email, repo"
+          }
+        }
+      }
+    },
+    "Repositories" : {
+      "comment" : "Repositories count",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "仓库"
+          }
+        }
+      }
+    },
+    "Repository List" : {
+      "comment" : "Repository list section header",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "仓库列表"
+          }
+        }
+      }
+    },
+    "Retry" : {
+      "comment" : "Retry button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重试"
+          }
+        }
+      }
+    },
+    "Save" : {
+      "comment" : "Save button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存"
+          }
+        }
+      }
+    },
+    "Save login info question %@" : {
+      "comment" : "Save login dialog message",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "是否保存您的登录信息？保存后可使用%@快速登录。"
+          }
+        }
+      }
+    },
+    "Save login information" : {
+      "comment" : "Save login dialog title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存登录信息"
+          }
+        }
+      }
+    },
+    "Search GitHub repositories" : {
+      "comment" : "Search bar placeholder",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索 GitHub 项目"
+          }
+        }
+      }
+    },
+    "Security Reminder" : {
+      "comment" : "Security reminder title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安全提醒"
+          }
+        }
+      }
+    },
+    "Security Tips" : {
+      "comment" : "Security tips title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安全提示"
+          }
+        }
+      }
+    },
+    "Set reasonable expiration time" : {
+      "comment" : "Security warning",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "• 建议设置合理的过期时间"
+          }
+        }
+      }
+    },
+    "This person is lazy and wrote nothing" : {
+      "comment" : "Default bio text",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这个人很懒，什么都没写"
+          }
+        }
+      }
+    },
+    "This project has no README file." : {
+      "comment" : "No README message",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "该项目暂无README文件。"
+          }
+        }
+      }
+    },
+    "Token expired, please login again" : {
+      "comment" : "Error message",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token 已过期，请重新登录"
+          }
+        }
+      }
+    },
+    "Token has same permissions as your GitHub account" : {
+      "comment" : "Security warning",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "• Token 具有与您的 GitHub 账户相同的权限"
+          }
+        }
+      }
+    },
+    "Token invalid or expired" : {
+      "comment" : "Error message",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token 无效或已过期"
+          }
+        }
+      }
+    },
+    "Token will be securely stored in device keychain" : {
+      "comment" : "Security tip",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "• Token 将安全存储在设备钥匙串中"
+          }
+        }
+      }
+    },
+    "Touch ID" : {
+      "comment" : "Touch ID name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touch ID"
+          }
+        }
+      }
+    },
+    "Unknown error" : {
+      "comment" : "Error message",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未知错误"
+          }
+        }
+      }
+    },
+    "Unknown time" : {
+      "comment" : "Unknown time display",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未知时间"
+          }
+        }
+      }
+    },
+    "Use in App" : {
+      "comment" : "Token guide step title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在应用中使用"
+          }
+        }
+      }
+    },
+    "Use in App Description" : {
+      "comment" : "Token guide step description",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "返回应用，将复制的 Token 粘贴到登录界面"
+          }
+        }
+      }
+    },
+    "Use Personal Access Token to login and get real GitHub data" : {
+      "comment" : "Login description",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用 Personal Access Token 登录以获取真实的 GitHub 数据"
+          }
+        }
+      }
+    },
+    "User cancelled" : {
+      "comment" : "Error message",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用户取消操作"
+          }
+        }
+      }
+    },
+    "User has no public repositories" : {
+      "comment" : "Empty state message",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "该用户暂无公开仓库"
+          }
+        }
+      }
+    },
+    "View all %lld repositories" : {
+      "comment" : "View all repositories button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "查看全部 %lld 个项目"
+          }
+        }
+      }
+    },
+    "You cancelled biometric authorization, Token will be saved but quick login unavailable" : {
+      "comment" : "User cancelled biometry message",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "您取消了生物识别授权，Token仍会保存，但无法使用快速登录"
+          }
+        }
+      }
+    },
+    "You have not created any repositories yet" : {
+      "comment" : "Empty repositories description",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "您还没有创建任何项目"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -237,7 +237,7 @@ class RepositoryTableViewCell: UITableViewCell {
         
         nameLabel.text = repository.name
         ownerLabel.text = repository.owner.login
-        descriptionLabel.text = repository.description ?? "无描述"
+        descriptionLabel.text = repository.description ?? NSLocalizedString("No description", comment: "No description text")
         starCountLabel.text = formatCount(repository.stargazersCount)
         forkCountLabel.text = formatCount(repository.forksCount)
         

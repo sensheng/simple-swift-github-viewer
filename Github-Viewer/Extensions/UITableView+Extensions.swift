@@ -139,7 +139,7 @@ class LoadingStateView: UIView {
     
     private let messageLabel: UILabel = {
         let label = UILabel()
-        label.text = "加载中..."
+        label.text = NSLocalizedString("Loading...", comment: "Loading text")
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = UIColor.systemGray2
         label.textAlignment = .center

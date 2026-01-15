@@ -140,7 +140,7 @@ class MeViewModel: ObservableObject {
     
     func loginWithToken() {
         guard !accessToken.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            errorMessage = "请输入有效的 Personal Access Token"
+            errorMessage = NSLocalizedString("Please enter valid Personal Access Token", comment: "Token validation error")
             return
         }
         
@@ -216,13 +216,13 @@ class MeViewModel: ObservableObject {
         
         switch error {
         case .biometryNotAvailable:
-            message = "设备不支持生物识别，但Token仍会保存"
+            message = NSLocalizedString("Device does not support biometry, but Token will be saved", comment: "Biometry not available message")
         case .biometryNotEnrolled:
-            message = "未设置生物识别，请在系统设置中设置后即可使用快速登录"
+            message = NSLocalizedString("Biometry not set up, please set up in system settings to use quick login", comment: "Biometry not enrolled message")
         case .userCancel:
-            message = "您取消了生物识别授权，Token仍会保存，但无法使用快速登录"
+            message = NSLocalizedString("You cancelled biometric authorization, Token will be saved but quick login unavailable", comment: "User cancelled biometry message")
         default:
-            message = "生物识别设置失败，Token仍会保存"
+            message = NSLocalizedString("Biometric setup failed, Token will be saved", comment: "Biometry failed message")
         }
         
         // Do not save token when biometry permission is denied
@@ -360,22 +360,22 @@ class MeViewModel: ObservableObject {
     var biometryButtonTitle: String {
         switch authManager.getBiometryType() {
         case .faceID:
-            return "使用 Face ID 登录"
+            return NSLocalizedString("Login with Face ID", comment: "Face ID login button")
         case .touchID:
-            return "使用 Touch ID 登录"
+            return NSLocalizedString("Login with Touch ID", comment: "Touch ID login button")
         default:
-            return "使用生物识别登录"
+            return NSLocalizedString("Login with Biometry", comment: "Generic biometry login button")
         }
     }
     
     var biometryName: String {
         switch authManager.getBiometryType() {
         case .faceID:
-            return "Face ID"
+            return NSLocalizedString("Face ID", comment: "Face ID name")
         case .touchID:
-            return "Touch ID"
+            return NSLocalizedString("Touch ID", comment: "Touch ID name")
         default:
-            return "生物识别"
+            return NSLocalizedString("Biometric Authentication", comment: "Generic biometry name")
         }
     }
     

@@ -14,7 +14,7 @@
             <objects>
                 <tableViewController title="Home" id="rv4-5F-GwY" customClass="MainViewController" customModule="Github_Viewer" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" id="KUQ-Pa-gc4">
-                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="735"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <prototypes>
@@ -38,11 +38,11 @@
             </objects>
             <point key="canvasLocation" x="2636" y="-326"/>
         </scene>
-        <!--Me-->
+        <!--我的-->
         <scene sceneID="LPk-SN-WS0">
             <objects>
                 <navigationController id="ICG-mF-lqp" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Me" image="person" catalog="system" id="cAt-Zf-nBa"/>
+                    <tabBarItem key="tabBarItem" title="我的" image="person" catalog="system" id="cAt-Zf-nBa"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="Yhh-HD-9Mi">
                         <rect key="frame" x="0.0" y="118" width="393" height="54"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -60,7 +60,7 @@
             <objects>
                 <viewController id="7Ww-mT-MRL" customClass="MeViewController" customModule="Github_Viewer" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="c7P-32-RKD">
-                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="735"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <viewLayoutGuide key="safeArea" id="s4l-k2-Zes"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -92,7 +92,7 @@
         <scene sceneID="f6G-GQ-6jY">
             <objects>
                 <tabBarController id="184-Oh-CTB" sceneMemberID="viewController">
-                    <tabBar key="tabBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="KdV-8u-lv2">
+                    <tabBar key="tabBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" translucent="NO" id="KdV-8u-lv2">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="49"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

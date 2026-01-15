@@ -253,12 +253,12 @@ extension RepositoryViewModel {
     var searchStateDescription: String {
         if isSearchMode {
             if let query = currentQuery {
-                return "搜索: \(query)"
+                return String(format: NSLocalizedString("Search: %@", comment: "Search state with query"), query)
             } else {
-                return "搜索中..."
+                return NSLocalizedString("Searching...", comment: "Searching state")
             }
         } else {
-            return "热门项目"
+            return NSLocalizedString("Trending Repositories", comment: "Trending repositories title")
         }
     }
     
@@ -268,9 +268,9 @@ extension RepositoryViewModel {
     
     var emptyStateMessage: String {
         if isSearchMode {
-            return "未找到相关项目"
+            return NSLocalizedString("No repositories found", comment: "Empty search results message")
         } else {
-            return "暂无数据"
+            return NSLocalizedString("No data available", comment: "Empty state message")
         }
     }
 }

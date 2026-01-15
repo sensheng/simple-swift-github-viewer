@@ -156,7 +156,7 @@ class GitHubService: GitHubServiceProtocol {
                 if let repository = searchResponse.items.first {
                     completion(.success(repository))
                 } else {
-                    completion(.failure(APIError.serverError("Repository not found")))
+                    completion(.failure(APIError.serverError(NSLocalizedString("Repository not found", comment: "Repository not found error"))))
                 }
             case .failure(let error):
                 completion(.failure(error))

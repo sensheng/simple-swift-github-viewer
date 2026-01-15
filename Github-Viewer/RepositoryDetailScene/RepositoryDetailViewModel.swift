@@ -50,7 +50,7 @@ class RepositoryDetailViewModel: ObservableObject {
     }
     
     var repositoryDescription: String {
-        return repository.description ?? "无描述"
+        return repository.description ?? NSLocalizedString("No description", comment: "No description text")
     }
     
     var starsCount: String {

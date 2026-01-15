@@ -45,25 +45,25 @@ enum AuthError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidToken:
-            return "Token 无效或已过期"
+            return NSLocalizedString("Token invalid or expired", comment: "Error message")
         case .tokenExpired:
-            return "Token 已过期，请重新登录"
+            return NSLocalizedString("Token expired, please login again", comment: "Error message")
         case .networkError(let error):
-            return "网络错误: \(error.localizedDescription)"
+            return String(format: NSLocalizedString("Network error: %@", comment: "Error message with parameter"), error.localizedDescription)
         case .biometryNotAvailable:
-            return "生物识别不可用"
+            return NSLocalizedString("Biometry not available", comment: "Error message")
         case .biometryNotEnrolled:
-            return "未设置生物识别"
+            return NSLocalizedString("Biometry not enrolled", comment: "Error message")
         case .biometryFailed:
-            return "生物识别验证失败"
+            return NSLocalizedString("Biometry authentication failed", comment: "Biometry authentication failed")
         case .userCancel:
-            return "用户取消操作"
+            return NSLocalizedString("User cancelled", comment: "Error message")
         case .keychainError(let status):
-            return "钥匙串错误: \(status)"
+            return String(format: NSLocalizedString("Keychain error: %d", comment: "Error message with parameter"), status)
         case .apiError(let message):
             return message
         case .unknownError:
-            return "未知错误"
+            return NSLocalizedString("Unknown error", comment: "Error message")
         }
     }
 }
@@ -131,7 +131,7 @@ class AuthManager: AuthManagerProtocol {
                                 case .unauthorized:
                                     completion(.failure(.invalidToken))
                                 case .forbidden:
-                                    completion(.failure(.apiError("Token 权限不足，请检查权限设置")))
+                                    completion(.failure(.apiError(NSLocalizedString("Token permissions insufficient, please check permission settings", comment: "Token permission error"))))
                                 case .serverError(let message):
                                     completion(.failure(.apiError(message)))
                                 default:
@@ -173,14 +173,14 @@ class AuthManager: AuthManagerProtocol {
         
         let keychainToken = keychain.getString(for: Constants.KeychainKeys.accessToken)
         guard let token = keychainToken, !token.isEmpty else {
-            completion(.failure(.apiError("未找到保存的登录信息，请重新输入Token登录")))
+            completion(.failure(.apiError(NSLocalizedString("No saved login information found, please enter Token to login again", comment: "No saved login error"))))
             return
         }
         
         print("🔍 [AuthManager] Starting biometry authentication - Device: \(deviceType)")
         
         let context = LAContext()
-        let reason = "使用生物识别登录 GitHub Viewer"
+        let reason = NSLocalizedString("Use biometric authentication to login to GitHub Viewer", comment: "Biometry login reason")
         
         context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { [weak self] success, error in
             DispatchQueue.main.async {
@@ -225,7 +225,7 @@ class AuthManager: AuthManagerProtocol {
                                 case .unauthorized:
                                     completion(.failure(.tokenExpired))
                                 case .forbidden:
-                                    completion(.failure(.apiError("Token 权限不足")))
+                                    completion(.failure(.apiError(NSLocalizedString("Token permissions insufficient", comment: "Token permission error"))))
                                 case .serverError(let message):
                                     completion(.failure(.apiError(message)))
                                 default:
@@ -342,7 +342,7 @@ class AuthManager: AuthManagerProtocol {
         }
         
         // Request for permission
-        let reason = "允许使用生物识别功能以便下次快速登录"
+        let reason = NSLocalizedString("Allow biometric authentication for quick login next time", comment: "Biometry setup reason")
         context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, error in
             DispatchQueue.main.async {
                 if success {
