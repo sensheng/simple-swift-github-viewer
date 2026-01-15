@@ -158,6 +158,76 @@ struct GitHubContributor: Codable {
 // MARK: - GitHub Language Stats
 typealias GitHubLanguageStats = [String: Int]
 
+// MARK: - GitHub File Model
+struct GitHubFile: Codable {
+    let name: String
+    let path: String
+    let sha: String
+    let size: Int
+    let url: String
+    let htmlURL: String
+    let gitURL: String
+    let downloadURL: String?
+    let type: String // "file" or "dir"
+    
+    enum CodingKeys: String, CodingKey {
+        case name, path, sha, size, url, type
+        case htmlURL = "html_url"
+        case gitURL = "git_url"
+        case downloadURL = "download_url"
+    }
+    
+    var isDirectory: Bool {
+        return type == "dir"
+    }
+    
+    var isFile: Bool {
+        return type == "file"
+    }
+    
+    var fileExtension: String? {
+        return URL(fileURLWithPath: name).pathExtension.isEmpty ? nil : URL(fileURLWithPath: name).pathExtension
+    }
+    
+    var displayName: String {
+        // 对于文件列表优化：显示完整路径而不是文件夹
+        return path
+    }
+    
+    var iconName: String {
+        if isDirectory {
+            return "folder.fill"
+        }
+        
+        guard let ext = fileExtension?.lowercased() else {
+            return "doc"
+        }
+        
+        switch ext {
+        case "swift":
+            return "swift"
+        case "md", "markdown":
+            return "doc.text"
+        case "json":
+            return "doc.text"
+        case "txt":
+            return "doc.plaintext"
+        case "pdf":
+            return "doc.richtext"
+        case "jpg", "jpeg", "png", "gif", "svg":
+            return "photo"
+        case "mp4", "mov", "avi":
+            return "video"
+        case "mp3", "wav", "m4a":
+            return "music.note"
+        case "zip", "tar", "gz":
+            return "doc.zipper"
+        default:
+            return "doc"
+        }
+    }
+}
+
 // MARK: - Token Validation Response
 struct TokenValidationResponse: Codable {
     let scopes: [String]?

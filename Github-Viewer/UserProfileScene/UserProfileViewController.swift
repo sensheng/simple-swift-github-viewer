@@ -344,7 +344,7 @@ class UserProfileViewController: UIViewController {
     
     private func updateUI() {
         nameLabel.text = viewModel.displayName
-        usernameLabel.text = "@\(viewModel.userLogin)"
+        usernameLabel.text = viewModel.userLogin
         bioLabel.text = viewModel.userBio
         joinedDateLabel.text = viewModel.joinedDate
         

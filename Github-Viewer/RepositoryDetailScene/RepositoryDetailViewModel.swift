@@ -18,7 +18,7 @@ protocol RepositoryDetailViewModelDelegate: AnyObject {
     func repositoryDetailViewModel(_ viewModel: RepositoryDetailViewModel, didUpdateRepository repository: GitHubRepository)
     func repositoryDetailViewModel(_ viewModel: RepositoryDetailViewModel, didUpdateReadme readme: GitHubReadme?)
     func repositoryDetailViewModel(_ viewModel: RepositoryDetailViewModel, didUpdateContributors contributors: [GitHubContributor])
-    func repositoryDetailViewModel(_ viewModel: RepositoryDetailViewModel, didUpdateLanguages languages: GitHubLanguageStats)
+    func repositoryDetailViewModel(_ viewModel: RepositoryDetailViewModel, didUpdateFiles files: [GitHubFile])
 }
 
 // MARK: - Repository Detail View Model
@@ -31,7 +31,7 @@ class RepositoryDetailViewModel: ObservableObject {
     @Published private(set) var repository: GitHubRepository
     @Published private(set) var readme: GitHubReadme?
     @Published private(set) var contributors: [GitHubContributor] = []
-    @Published private(set) var languages: GitHubLanguageStats = [:]
+    @Published private(set) var files: [GitHubFile] = []
     @Published private(set) var isLoading = false
     @Published private(set) var error: Error?
     
@@ -92,17 +92,6 @@ class RepositoryDetailViewModel: ObservableObject {
         return String(data: data, encoding: .utf8)
     }
     
-    var languagePercentages: [(language: String, percentage: Double, color: UIColor)] {
-        let total = languages.values.reduce(0, +)
-        guard total > 0 else { return [] }
-        
-        return languages.map { (language, bytes) in
-            let percentage = Double(bytes) / Double(total) * 100
-            let color = colorForLanguage(language)
-            return (language: language, percentage: percentage, color: color)
-        }.sorted { $0.percentage > $1.percentage }
-    }
-    
     // MARK: - Initialization
     
     init(repository: GitHubRepository,
@@ -122,7 +111,7 @@ class RepositoryDetailViewModel: ObservableObject {
         
         let token = authService.accessToken
         
-        // Load repository details, README, contributors, and languages in parallel
+        // Load repository details, README, contributors, and files in parallel
         let repositoryPublisher = apiService.getRepository(
             owner: ownerName,
             repo: repositoryName,
@@ -144,18 +133,18 @@ class RepositoryDetailViewModel: ObservableObject {
         )
         .catch { _ in Just([GitHubContributor]()).setFailureType(to: Error.self) } // Don't fail if contributors can't be loaded
         
-        let languagesPublisher = apiService.getRepositoryLanguages(
+        let filesPublisher = apiService.getAllRepositoryFiles(
             owner: ownerName,
             repo: repositoryName,
             token: token
         )
-        .catch { _ in Just(GitHubLanguageStats()).setFailureType(to: Error.self) } // Don't fail if languages can't be loaded
+        .catch { _ in Just([GitHubFile]()).setFailureType(to: Error.self) } // Don't fail if files can't be loaded
         
         Publishers.CombineLatest4(
             repositoryPublisher,
             readmePublisher,
             contributorsPublisher,
-            languagesPublisher
+            filesPublisher
         )
         .receive(on: DispatchQueue.main)
         .sink(
@@ -172,18 +161,18 @@ class RepositoryDetailViewModel: ObservableObject {
                     self.delegate?.repositoryDetailViewModel(self, didFailWithError: error)
                 }
             },
-            receiveValue: { [weak self] repository, readme, contributors, languages in
+            receiveValue: { [weak self] repository, readme, contributors, files in
                 guard let self = self else { return }
                 
                 self.repository = repository
                 self.readme = readme
                 self.contributors = contributors
-                self.languages = languages
+                self.files = files
                 
                 self.delegate?.repositoryDetailViewModel(self, didUpdateRepository: repository)
                 self.delegate?.repositoryDetailViewModel(self, didUpdateReadme: readme)
                 self.delegate?.repositoryDetailViewModel(self, didUpdateContributors: contributors)
-                self.delegate?.repositoryDetailViewModel(self, didUpdateLanguages: languages)
+                self.delegate?.repositoryDetailViewModel(self, didUpdateFiles: files)
             }
         )
         .store(in: &cancellables)
@@ -196,6 +185,36 @@ class RepositoryDetailViewModel: ObservableObject {
     
     func shareRepository() -> URL? {
         return URL(string: repositoryURL)
+    }
+    
+    func downloadFile(_ file: GitHubFile, completion: @escaping (Result<URL, Error>) -> Void) {
+        guard let downloadURL = file.downloadURL else {
+            completion(.failure(APIError.invalidURL))
+            return
+        }
+        
+        let token = authService.accessToken
+        
+        apiService.downloadFile(url: downloadURL, token: token)
+            .sink(
+                receiveCompletion: { completionResult in
+                    if case .failure(let error) = completionResult {
+                        completion(.failure(error))
+                    }
+                },
+                receiveValue: { data in
+                    // Save file to temporary directory
+                    let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(file.name)
+                    
+                    do {
+                        try data.write(to: tempURL)
+                        completion(.success(tempURL))
+                    } catch {
+                        completion(.failure(error))
+                    }
+                }
+            )
+            .store(in: &cancellables)
     }
     
     // MARK: - Private Methods
@@ -222,38 +241,5 @@ class RepositoryDetailViewModel: ObservableObject {
         displayFormatter.locale = Locale(identifier: "zh_CN")
         
         return displayFormatter.string(from: date)
-    }
-    
-    private func colorForLanguage(_ language: String) -> UIColor {
-        switch language.lowercased() {
-        case "swift":
-            return UIColor.systemOrange
-        case "javascript", "typescript":
-            return UIColor.systemYellow
-        case "python":
-            return UIColor.systemBlue
-        case "java":
-            return UIColor.systemRed
-        case "kotlin":
-            return UIColor.systemPurple
-        case "go":
-            return UIColor.systemTeal
-        case "rust":
-            return UIColor.systemBrown
-        case "c++", "c":
-            return UIColor.systemIndigo
-        case "ruby":
-            return UIColor.systemPink
-        case "php":
-            return UIColor.systemGray
-        case "html":
-            return UIColor.systemOrange
-        case "css":
-            return UIColor.systemBlue
-        case "shell":
-            return UIColor.systemGreen
-        default:
-            return UIColor.systemBlue
-        }
     }
 }

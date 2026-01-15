@@ -7,44 +7,28 @@
 //
 
 import SwiftUI
-import Combine
+import Kingfisher
 
-// iOS 14 compatible remote image view
+// iOS 14 compatible remote image view using Kingfisher
 struct RemoteImageView: View {
     
     let url: String?
-    @StateObject private var imageLoader = ImageLoader()
     
     var body: some View {
         Group {
-            if let image = imageLoader.image {
-                Image(uiImage: image)
+            if let urlString = url, let imageURL = URL(string: urlString) {
+                KFImage(imageURL)
+                    .placeholder {
+                        Image(systemName: "person.circle.fill")
+                            .font(.system(size: 80))
+                            .foregroundColor(.gray)
+                    }
                     .resizable()
                     .aspectRatio(contentMode: .fill)
             } else {
                 Image(systemName: "person.circle.fill")
                     .font(.system(size: 80))
                     .foregroundColor(.gray)
-            }
-        }
-        .onAppear {
-            if let urlString = url {
-                imageLoader.loadImage(from: urlString)
-            }
-        }
-    }
-}
-
-// Image loader for iOS 14 compatibility using existing ImageCache
-class ImageLoader: ObservableObject {
-    
-    @Published var image: UIImage?
-    
-    func loadImage(from urlString: String) {
-        // Use existing ImageCache from the project
-        ImageCache.shared.loadImage(from: urlString) { [weak self] loadedImage in
-            DispatchQueue.main.async {
-                self?.image = loadedImage
             }
         }
     }

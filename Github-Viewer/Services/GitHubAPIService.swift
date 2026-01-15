@@ -21,6 +21,9 @@ protocol GitHubAPIServiceProtocol {
     func getRepositoryReadme(owner: String, repo: String, token: String?) -> AnyPublisher<GitHubReadme, Error>
     func getRepositoryContributors(owner: String, repo: String, token: String?) -> AnyPublisher<[GitHubContributor], Error>
     func getRepositoryLanguages(owner: String, repo: String, token: String?) -> AnyPublisher<GitHubLanguageStats, Error>
+    func getRepositoryFiles(owner: String, repo: String, path: String?, token: String?) -> AnyPublisher<[GitHubFile], Error>
+    func getAllRepositoryFiles(owner: String, repo: String, token: String?) -> AnyPublisher<[GitHubFile], Error>
+    func downloadFile(url: String, token: String?) -> AnyPublisher<Data, Error>
     func getUser(username: String, token: String?) -> AnyPublisher<GitHubUserProfile, Error>
     func getUserRepositories(username: String, token: String?, page: Int, perPage: Int) -> AnyPublisher<[GitHubRepository], Error>
 }
@@ -313,6 +316,109 @@ class GitHubAPIService: GitHubAPIServiceProtocol {
                 return data
             }
             .decode(type: GitHubLanguageStats.self, decoder: JSONDecoder())
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+    }
+    
+    // MARK: - Get Repository Files
+    func getRepositoryFiles(owner: String, repo: String, path: String? = nil, token: String? = nil) -> AnyPublisher<[GitHubFile], Error> {
+        let pathComponent = path?.isEmpty == false ? "/\(path!)" : ""
+        guard let url = URL(string: "\(baseURL)/repos/\(owner)/\(repo)/contents\(pathComponent)") else {
+            return Fail(error: APIError.invalidURL)
+                .eraseToAnyPublisher()
+        }
+        
+        var request = URLRequest(url: url)
+        if let token = token {
+            request.setValue("token \(token)", forHTTPHeaderField: "Authorization")
+        }
+        request.setValue("application/vnd.github.v3+json", forHTTPHeaderField: "Accept")
+        request.setValue("Github-Viewer-iOS/1.0", forHTTPHeaderField: "User-Agent")
+        
+        return session.dataTaskPublisher(for: request)
+            .tryMap { data, response -> Data in
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    throw APIError.invalidResponse
+                }
+                
+                if !(200...299).contains(httpResponse.statusCode) {
+                    if let errorResponse = try? JSONDecoder().decode(GitHubAPIError.self, from: data) {
+                        throw APIError.serverError(errorResponse.message)
+                    }
+                    throw APIError.serverError("HTTP \(httpResponse.statusCode)")
+                }
+                
+                return data
+            }
+            .decode(type: [GitHubFile].self, decoder: JSONDecoder())
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+    }
+    
+    // MARK: - Get All Repository Files (Recursive)
+    func getAllRepositoryFiles(owner: String, repo: String, token: String? = nil) -> AnyPublisher<[GitHubFile], Error> {
+        return getRepositoryFilesRecursive(owner: owner, repo: repo, path: nil, token: token)
+            .map { files in
+                // 只返回文件，不返回文件夹，并按路径排序
+                return files
+                    .filter { !$0.isDirectory }
+                    .sorted { $0.path < $1.path }
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    // MARK: - Private Recursive Helper
+    private func getRepositoryFilesRecursive(owner: String, repo: String, path: String?, token: String?) -> AnyPublisher<[GitHubFile], Error> {
+        return getRepositoryFiles(owner: owner, repo: repo, path: path, token: token)
+            .flatMap { files -> AnyPublisher<[GitHubFile], Error> in
+                let filePublishers = files.map { file -> AnyPublisher<[GitHubFile], Error> in
+                    if file.isDirectory {
+                        // 递归获取子目录中的文件
+                        return self.getRepositoryFilesRecursive(owner: owner, repo: repo, path: file.path, token: token)
+                    } else {
+                        // 直接返回文件
+                        return Just([file])
+                            .setFailureType(to: Error.self)
+                            .eraseToAnyPublisher()
+                    }
+                }
+                
+                // 合并所有结果
+                return Publishers.MergeMany(filePublishers)
+                    .collect()
+                    .map { arrays in
+                        return arrays.flatMap { $0 }
+                    }
+                    .eraseToAnyPublisher()
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    // MARK: - Download File
+    func downloadFile(url: String, token: String? = nil) -> AnyPublisher<Data, Error> {
+        guard let fileURL = URL(string: url) else {
+            return Fail(error: APIError.invalidURL)
+                .eraseToAnyPublisher()
+        }
+        
+        var request = URLRequest(url: fileURL)
+        if let token = token {
+            request.setValue("token \(token)", forHTTPHeaderField: "Authorization")
+        }
+        request.setValue("Github-Viewer-iOS/1.0", forHTTPHeaderField: "User-Agent")
+        
+        return session.dataTaskPublisher(for: request)
+            .tryMap { data, response -> Data in
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    throw APIError.invalidResponse
+                }
+                
+                if !(200...299).contains(httpResponse.statusCode) {
+                    throw APIError.serverError("HTTP \(httpResponse.statusCode)")
+                }
+                
+                return data
+            }
             .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
     }

@@ -73,7 +73,7 @@ class RepositoryDetailViewController: UIViewController {
     }()
     
     private let segmentedControl: UISegmentedControl = {
-        let items = ["README", "语言", "贡献者"]
+        let items = ["README", "文件列表", "贡献者"]
         let control = UISegmentedControl(items: items)
         control.selectedSegmentIndex = 0
         control.translatesAutoresizingMaskIntoConstraints = false
@@ -87,15 +87,13 @@ class RepositoryDetailViewController: UIViewController {
         return view
     }()
     
-    private let readmeWebView: WKWebView = {
-        let webView = WKWebView()
-        webView.backgroundColor = UIColor.systemBackground
-        webView.isOpaque = false
-        webView.translatesAutoresizingMaskIntoConstraints = false
-        return webView
+    private let readmeMarkdownView: MarkdownView = {
+        let markdownView = MarkdownView()
+        markdownView.translatesAutoresizingMaskIntoConstraints = false
+        return markdownView
     }()
     
-    private let languagesTableView: UITableView = {
+    private let filesTableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
         tableView.backgroundColor = UIColor.systemGroupedBackground
         tableView.separatorStyle = .none
@@ -258,13 +256,13 @@ class RepositoryDetailViewController: UIViewController {
     }
     
     private func setupContentViews() {
-        contentContainerView.addSubview(readmeWebView)
-        contentContainerView.addSubview(languagesTableView)
+        contentContainerView.addSubview(readmeMarkdownView)
+        contentContainerView.addSubview(filesTableView)
         contentContainerView.addSubview(contributorsTableView)
         
         // Initially show README
-        readmeWebView.isHidden = false
-        languagesTableView.isHidden = true
+        readmeMarkdownView.isHidden = false
+        filesTableView.isHidden = true
         contributorsTableView.isHidden = true
     }
     
@@ -331,15 +329,15 @@ class RepositoryDetailViewController: UIViewController {
             contentContainerView.heightAnchor.constraint(greaterThanOrEqualToConstant: 400),
             
             // Content views
-            readmeWebView.topAnchor.constraint(equalTo: contentContainerView.topAnchor),
-            readmeWebView.leadingAnchor.constraint(equalTo: contentContainerView.leadingAnchor),
-            readmeWebView.trailingAnchor.constraint(equalTo: contentContainerView.trailingAnchor),
-            readmeWebView.bottomAnchor.constraint(equalTo: contentContainerView.bottomAnchor),
+            readmeMarkdownView.topAnchor.constraint(equalTo: contentContainerView.topAnchor),
+            readmeMarkdownView.leadingAnchor.constraint(equalTo: contentContainerView.leadingAnchor),
+            readmeMarkdownView.trailingAnchor.constraint(equalTo: contentContainerView.trailingAnchor),
+            readmeMarkdownView.bottomAnchor.constraint(equalTo: contentContainerView.bottomAnchor),
             
-            languagesTableView.topAnchor.constraint(equalTo: contentContainerView.topAnchor),
-            languagesTableView.leadingAnchor.constraint(equalTo: contentContainerView.leadingAnchor),
-            languagesTableView.trailingAnchor.constraint(equalTo: contentContainerView.trailingAnchor),
-            languagesTableView.bottomAnchor.constraint(equalTo: contentContainerView.bottomAnchor),
+            filesTableView.topAnchor.constraint(equalTo: contentContainerView.topAnchor),
+            filesTableView.leadingAnchor.constraint(equalTo: contentContainerView.leadingAnchor),
+            filesTableView.trailingAnchor.constraint(equalTo: contentContainerView.trailingAnchor),
+            filesTableView.bottomAnchor.constraint(equalTo: contentContainerView.bottomAnchor),
             
             contributorsTableView.topAnchor.constraint(equalTo: contentContainerView.topAnchor),
             contributorsTableView.leadingAnchor.constraint(equalTo: contentContainerView.leadingAnchor),
@@ -358,9 +356,9 @@ class RepositoryDetailViewController: UIViewController {
     }
     
     private func setupTableViews() {
-        languagesTableView.delegate = self
-        languagesTableView.dataSource = self
-        languagesTableView.register(UITableViewCell.self, forCellReuseIdentifier: "LanguageCell")
+        filesTableView.delegate = self
+        filesTableView.dataSource = self
+        filesTableView.register(FileTableViewCell.self, forCellReuseIdentifier: FileTableViewCell.identifier)
         
         contributorsTableView.delegate = self
         contributorsTableView.dataSource = self
@@ -391,16 +389,16 @@ class RepositoryDetailViewController: UIViewController {
     @objc private func segmentedControlChanged() {
         switch segmentedControl.selectedSegmentIndex {
         case 0: // README
-            readmeWebView.isHidden = false
-            languagesTableView.isHidden = true
+            readmeMarkdownView.isHidden = false
+            filesTableView.isHidden = true
             contributorsTableView.isHidden = true
-        case 1: // Languages
-            readmeWebView.isHidden = true
-            languagesTableView.isHidden = false
+        case 1: // Files
+            readmeMarkdownView.isHidden = true
+            filesTableView.isHidden = false
             contributorsTableView.isHidden = true
         case 2: // Contributors
-            readmeWebView.isHidden = true
-            languagesTableView.isHidden = true
+            readmeMarkdownView.isHidden = true
+            filesTableView.isHidden = true
             contributorsTableView.isHidden = false
         default:
             break
@@ -411,7 +409,7 @@ class RepositoryDetailViewController: UIViewController {
     
     private func updateUI() {
         repositoryNameLabel.text = viewModel.repositoryName
-        ownerLabel.text = viewModel.ownerName
+        ownerLabel.text = "\(viewModel.ownerName) >"
         descriptionLabel.text = viewModel.repositoryDescription
         
         // Load avatar
@@ -440,44 +438,12 @@ class RepositoryDetailViewController: UIViewController {
     
     private func loadReadmeContent() {
         guard let readmeContent = viewModel.readmeContent else {
-            let html = "<html><body><p>无README文件</p></body></html>"
-            readmeWebView.loadHTMLString(html, baseURL: nil)
+            readmeMarkdownView.loadMarkdown("# 无README文件\n\n该项目暂无README文件。")
             return
         }
         
-        // Convert Markdown to HTML (simplified)
-        let html = """
-        <html>
-        <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <style>
-                body { 
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                    padding: 16px;
-                    line-height: 1.6;
-                    color: \(UIColor.label.hexString);
-                    background-color: \(UIColor.systemBackground.hexString);
-                }
-                pre { 
-                    background-color: \(UIColor.systemGray6.hexString);
-                    padding: 12px;
-                    border-radius: 8px;
-                    overflow-x: auto;
-                }
-                code {
-                    background-color: \(UIColor.systemGray6.hexString);
-                    padding: 2px 4px;
-                    border-radius: 4px;
-                }
-            </style>
-        </head>
-        <body>
-            <pre>\(readmeContent.htmlEscaped)</pre>
-        </body>
-        </html>
-        """
-        
-        readmeWebView.loadHTMLString(html, baseURL: nil)
+        // Load markdown content using MarkdownView
+        readmeMarkdownView.loadMarkdown(readmeContent)
     }
 }
 
@@ -523,8 +489,8 @@ extension RepositoryDetailViewController: RepositoryDetailViewModelDelegate {
         contributorsTableView.reloadData()
     }
     
-    func repositoryDetailViewModel(_ viewModel: RepositoryDetailViewModel, didUpdateLanguages languages: GitHubLanguageStats) {
-        languagesTableView.reloadData()
+    func repositoryDetailViewModel(_ viewModel: RepositoryDetailViewModel, didUpdateFiles files: [GitHubFile]) {
+        filesTableView.reloadData()
     }
 }
 
@@ -533,8 +499,8 @@ extension RepositoryDetailViewController: RepositoryDetailViewModelDelegate {
 extension RepositoryDetailViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if tableView == languagesTableView {
-            return viewModel.languagePercentages.count
+        if tableView == filesTableView {
+            return viewModel.files.count
         } else if tableView == contributorsTableView {
             return viewModel.contributors.count
         }
@@ -542,20 +508,10 @@ extension RepositoryDetailViewController: UITableViewDataSource, UITableViewDele
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if tableView == languagesTableView {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "LanguageCell", for: indexPath)
-            let languageInfo = viewModel.languagePercentages[indexPath.row]
-            
-            cell.textLabel?.text = languageInfo.language
-            cell.detailTextLabel?.text = String(format: "%.1f%%", languageInfo.percentage)
-            cell.backgroundColor = UIColor.systemBackground
-            
-            // Add color indicator
-            let colorView = UIView(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
-            colorView.backgroundColor = languageInfo.color
-            colorView.layer.cornerRadius = 10
-            cell.accessoryView = colorView
-            
+        if tableView == filesTableView {
+            let cell = tableView.dequeueReusableCell(withIdentifier: FileTableViewCell.identifier, for: indexPath) as! FileTableViewCell
+            let file = viewModel.files[indexPath.row]
+            cell.configure(with: file)
             return cell
         } else if tableView == contributorsTableView {
             let cell = tableView.dequeueReusableCell(withIdentifier: "ContributorCell", for: indexPath)
@@ -574,7 +530,10 @@ extension RepositoryDetailViewController: UITableViewDataSource, UITableViewDele
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
-        if tableView == contributorsTableView {
+        if tableView == filesTableView {
+            let file = viewModel.files[indexPath.row]
+            handleFileSelection(file)
+        } else if tableView == contributorsTableView {
             let contributor = viewModel.contributors[indexPath.row]
             let userProfileViewController = UserProfileViewController(username: contributor.login)
             navigationController?.pushViewController(userProfileViewController, animated: true)
@@ -582,12 +541,25 @@ extension RepositoryDetailViewController: UITableViewDataSource, UITableViewDele
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        if tableView == languagesTableView {
-            return "编程语言"
+        if tableView == filesTableView {
+            return "文件列表"
         } else if tableView == contributorsTableView {
             return "贡献者"
         }
         return nil
+    }
+    
+    // MARK: - File Handling
+    
+    private func handleFileSelection(_ file: GitHubFile) {
+        // 由于我们只显示文件（不显示文件夹），所以直接处理文件选择
+        // TODO: 可以在这里添加文件预览或下载功能
+        print("Selected file: \(file.path)")
+        
+        // 如果有下载URL，可以在Safari中打开
+        if let downloadURL = file.downloadURL, let url = URL(string: downloadURL) {
+            UIApplication.shared.open(url)
+        }
     }
 }
 
@@ -617,5 +589,22 @@ extension String {
             .replacingOccurrences(of: ">", with: "&gt;")
             .replacingOccurrences(of: "\"", with: "&quot;")
             .replacingOccurrences(of: "'", with: "&#39;")
+    }
+}
+
+// MARK: - UIDocumentInteractionControllerDelegate
+
+extension RepositoryDetailViewController: UIDocumentInteractionControllerDelegate {
+    
+    func documentInteractionControllerViewControllerForPreview(_ controller: UIDocumentInteractionController) -> UIViewController {
+        return self
+    }
+    
+    func documentInteractionControllerRectForPreview(_ controller: UIDocumentInteractionController) -> CGRect {
+        return view.bounds
+    }
+    
+    func documentInteractionControllerViewForPreview(_ controller: UIDocumentInteractionController) -> UIView? {
+        return view
     }
 }
